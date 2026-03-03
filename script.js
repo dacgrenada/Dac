@@ -944,7 +944,7 @@ document.addEventListener('click', (e) => {
 
 // ⬇️ TESTING: paste your Stripe TEST link here
 // ⬇️ LIVE:    swap back to real link when ready
-const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/fZu3cp19C4PN10z0Ot5wI00';
+const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_fZu3cp19C4PN10z0Ot5wI00';
 const PAID_PREFIX          = 'dac_paid_';
 
 function isCodePaid(code) {
