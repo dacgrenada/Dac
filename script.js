@@ -900,7 +900,7 @@ document.addEventListener('click', (e) => {
 // PAYMENT HELPERS
 // ============================================================
 
-const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/fZu3cp19C4PN10z0Ot5wI00';
+const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_cNi00dbOgfurbFd0Ot5wI02';
 const SUCCESS_URL          = 'https://dacgrenada.github.io/Dac/success.html';
 const PAID_PREFIX          = 'dac_paid_';
 
