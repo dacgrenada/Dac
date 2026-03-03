@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Successful – DAC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0c1220; color: #e8eef6;
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 2rem;
+      text-align: center;
+    }
+    .card {
+      background: #141e30; border: 2px solid #3abf9e;
+      border-radius: 14px; max-width: 480px; width: 100%;
+      padding: 2.5rem 2rem; box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    }
+    .icon { font-size: 4rem; margin-bottom: 1rem; }
+    h1 { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: #3abf9e; margin-bottom: 0.5rem; }
+    p { font-size: 0.9rem; color: #7a92b4; margin-bottom: 1rem; line-height: 1.6; }
+    .code-box {
+      background: #1e2d44; border: 1px solid rgba(240,165,0,0.3);
+      border-radius: 8px; padding: 0.75rem 1.25rem; margin: 1rem 0;
+      font-family: 'IBM Plex Mono', monospace; font-size: 1.2rem;
+      font-weight: 600; color: #f0a500; letter-spacing: 0.08em;
+    }
+    .countdown {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem;
+      color: #7a92b4; margin-top: 1.5rem; letter-spacing: 0.06em;
+    }
+    .countdown span { color: #f0a500; font-weight: 700; }
+    .manual-btn {
+      display: inline-block; margin-top: 1rem;
+      padding: 0.6rem 1.5rem; background: #3abf9e; color: #0c1220;
+      font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700;
+      border: none; border-radius: 8px; cursor: pointer; text-decoration: none;
+    }
+    .manual-btn:hover { background: #4dd4b2; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">✅</div>
+  <h1>Payment Confirmed!</h1>
+  <p>Your DAC Address Layout has been unlocked.</p>
+
+  <div class="code-box" id="code-display">Processing…</div>
+
+  <p>This window will close automatically and your layout will unlock in:</p>
+  <div class="countdown">Closing in <span id="seconds">3</span> seconds…</div>
+
+  <br/>
+  <a href="https://dacgrenada.github.io/Dac/" class="manual-btn" id="back-btn">
+    ← Return to DAC Map
+  </a>
+</div>
+
+<script>
+  // 1. Read pending code from localStorage (saved before Stripe redirect)
+  var code = '';
+  try {
+    code = localStorage.getItem('dac_pending_payment_code') || '';
+  } catch(e) {}
+
+  // Also check URL params as fallback
+  var params = new URLSearchParams(window.location.search);
+  if (!code) code = params.get('code') || '';
+
+  // 2. Mark as PAID in localStorage
+  if (code) {
+    try {
+      localStorage.setItem('dac_paid_' + code, '1');
+      localStorage.removeItem('dac_pending_payment_code');
+      document.getElementById('code-display').textContent = code;
+    } catch(e) {}
+  } else {
+    document.getElementById('code-display').textContent = 'Payment recorded';
+  }
+
+  // 3. Countdown and auto-close
+  var secs = 3;
+  var el = document.getElementById('seconds');
+  var timer = setInterval(function() {
+    secs--;
+    if (el) el.textContent = secs;
+    if (secs <= 0) {
+      clearInterval(timer);
+      // Try to close this tab (works if opened by script)
+      window.close();
+      // If window.close() doesn't work (user opened directly),
+      // redirect back to DAC map instead
+      setTimeout(function() {
+        window.location.href = 'https://dacgrenada.github.io/Dac/';
+      }, 500);
+    }
+  }, 1000);
+</script>
+</body>
+</html>
