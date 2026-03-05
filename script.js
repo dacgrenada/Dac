@@ -19,7 +19,7 @@ const LAT_TO_METERS       = 111320;
 const LNG_TO_METERS       = 108900;
 const GRID_SIZE           = 50;
 const MAPS_API_KEY        = 'AIzaSyBJfcDVXsepgm5a9qGt2bfaRFtOKOfo-sw';
-const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_3cIfZb05y81ZeRpcxb5wI0e';
+const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_6oU6oBbOg2HFdNl40F5wI0f';
 const SNAP_PRECISION      = 5e-5;
 const PAID_PREFIX         = 'dac_paid_';
 
