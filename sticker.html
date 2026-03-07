@@ -133,7 +133,7 @@
     <div class="sticker-coords" id="stk-coords"></div>
     <div class="sticker-scan">📱 Scan for directions</div>
     <div class="sticker-web">🌐 dacgrenada.github.io/Dac</div>
-    <div class="sticker-email">✉ dac.grenada@gmail.com</div>
+    <div class="sticker-email">✉ <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="badedbd994ddc8dfd4dbdedbfaddd7dbd3d694d9d5d7">[email&#160;protected]</a></div>
     <div class="sticker-date" id="stk-date"></div>
   </div>
 
@@ -158,80 +158,125 @@
     <button class="btn-print-now" onclick="consumePrint()">🖨 Print Sticker</button>
   </div>
 
+  <div class="verifying-bar" id="verifying-bar" style="display:none;">&#128272; Verifying payment with server&#8230;</div>
+
 </div><!-- #sticker-root -->
 
 <script>
-(function() {
+(function () {
   'use strict';
 
-  // ── 1. Load data ──────────────────────────────────────────────────────────
-  var raw = null;
-  try { raw = localStorage.getItem('dac_sticker_data'); } catch(e) {}
+  var SUPABASE_URL = 'https://duoggvkkvyvicpfoawuv.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
+  var STRIPE_LINK  = 'https://buy.stripe.com/fZu3cp19C4PN10z0Ot5wI00';
 
-  if (!raw) {
+  // 1. Check URL for token FIRST (admin / success.html flow)
+  var urlParams = new URLSearchParams(window.location.search);
+  var urlToken  = urlParams.get('token') || '';
+
+  // 2. Load localStorage data
+  var d = null;
+  try {
+    var raw = localStorage.getItem('dac_sticker_data');
+    if (raw) d = JSON.parse(raw);
+  } catch (e) {}
+
+  // If no data AND no token — show error
+  if (!d && !urlToken) {
     document.getElementById('error-screen').style.display = 'flex';
     return;
   }
 
-  var d;
-  try { d = JSON.parse(raw); } catch(e) {
-    document.getElementById('error-screen').style.display = 'flex';
-    return;
-  }
-
+  // Show sticker root
   document.getElementById('sticker-root').style.display = 'contents';
-  document.title = 'DAC Sticker – ' + d.code;
 
-  // ── 2. Populate ───────────────────────────────────────────────────────────
-  document.getElementById('stk-code').textContent   = d.code;
-  document.getElementById('stk-coords').textContent = d.lat + ', ' + d.lng;
-  document.getElementById('stk-date').textContent   = 'Generated ' + d.dateStr;
+  // 3. Populate sticker from localStorage (if available)
+  if (d) {
+    document.title = 'DAC Sticker - ' + d.code;
+    document.getElementById('stk-code').textContent   = d.code;
+    document.getElementById('stk-coords').textContent = d.lat + ', ' + d.lng;
+    document.getElementById('stk-date').textContent   = 'Generated ' + d.dateStr;
 
-  var qrHolder = document.getElementById('stk-qr-holder');
-  if (d.qrUrl) {
-    var qrImg = document.createElement('img');
-    qrImg.src = d.qrUrl;
-    qrImg.className = 'sticker-qr';
-    qrImg.alt = 'QR Code';
-    qrHolder.replaceWith(qrImg);
-  } else {
-    qrHolder.textContent = 'QR unavailable';
+    var qrHolder = document.getElementById('stk-qr-holder');
+    if (d.qrUrl) {
+      var qrImg = document.createElement('img');
+      qrImg.src = d.qrUrl;
+      qrImg.className = 'sticker-qr';
+      qrImg.alt = 'QR Code';
+      qrHolder.replaceWith(qrImg);
+    } else {
+      qrHolder.textContent = 'QR unavailable';
+    }
   }
 
-  // ── 3. Payment flow ───────────────────────────────────────────────────────
-  var STRIPE_LINK    = d.stripeLink || 'https://buy.stripe.com/fZu3cp19C4PN10z0Ot5wI00';
+  // 4. Token in URL — verify with Supabase immediately
+  if (urlToken) {
+    document.getElementById('pay-bar').style.display       = 'none';
+    document.getElementById('verifying-bar').style.display = 'block';
+
+    fetch(SUPABASE_URL + '/rest/v1/dac_payments?token=eq.' + encodeURIComponent(urlToken) + '&select=id,dac_code,used,product', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (rows) {
+      if (!rows || rows.length === 0) { showPayError('Token not found. Please generate a new one.'); return; }
+      var row = rows[0];
+      if (row.used)                { showPayError('This token has already been used.'); return; }
+      if (row.product !== 'sticker') { showPayError('Wrong token type: ' + row.product); return; }
+
+      // If no localStorage data, fill what we know
+      if (!d) {
+        var code = row.dac_code || '';
+        document.getElementById('stk-code').textContent = code || '--';
+        document.title = 'DAC Sticker - ' + code;
+      }
+
+      // Mark token used then unlock
+      fetch(SUPABASE_URL + '/rest/v1/dac_payments?id=eq.' + row.id, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ used: true, used_at: new Date().toISOString() })
+      })
+      .then(function () { unlockSticker(); })
+      .catch(function () { unlockSticker(); });
+    })
+    .catch(function () { showPayError('Could not verify token. Check your connection.'); });
+
+    return;
+  }
+
+  // 5. Normal payment flow (no token in URL)
   var EXPECTED_CODE  = d.code;
   var paymentStarted = false;
   var unlocked       = false;
 
-  // Check if already paid (e.g. page reload after payment)
   try {
     if (localStorage.getItem('dac_sticker_paid_' + EXPECTED_CODE) === '1') {
-      // Consume the key immediately — one load = one use
-      try { localStorage.removeItem('dac_sticker_paid_' + EXPECTED_CODE); } catch(e) {}
+      localStorage.removeItem('dac_sticker_paid_' + EXPECTED_CODE);
       unlockSticker();
       return;
     }
-  } catch(e) {}
+  } catch (e) {}
 
-  // Open BroadcastChannel immediately so it's ready when success.html posts
-  var bc = null;
   try {
-    bc = new BroadcastChannel('dac_sticker_payment');
-    bc.onmessage = function(evt) {
+    var bc = new BroadcastChannel('dac_sticker_payment');
+    bc.onmessage = function (evt) {
       if (unlocked) return;
-      var msg = evt.data || {};
-      if (msg.paid) {
+      if ((evt.data || {}).paid) {
         unlocked = true;
-        try { bc.close(); } catch(e) {}
-        try { localStorage.removeItem('dac_sticker_paid_' + EXPECTED_CODE); } catch(e) {}
+        bc.close();
+        try { localStorage.removeItem('dac_sticker_paid_' + EXPECTED_CODE); } catch (e) {}
         unlockSticker();
       }
     };
-  } catch(e) {}
+  } catch (e) {}
 
-  // localStorage storage-event fallback
-  window.addEventListener('storage', function(e) {
+  window.addEventListener('storage', function (e) {
     if (unlocked) return;
     if (e.key === 'dac_sticker_paid_' + EXPECTED_CODE && e.newValue === '1') {
       unlocked = true;
@@ -239,29 +284,39 @@
     }
   });
 
-  window.startPayment = function() {
+  window.startPayment = function () {
     if (paymentStarted) return;
     paymentStarted = true;
-    try { localStorage.setItem('dac_pending_payment_code', EXPECTED_CODE); } catch(e) {}
-    try { localStorage.setItem('dac_payment_trigger', 'sticker'); } catch(e) {}
-    window.open(STRIPE_LINK, '_blank');
+    try { localStorage.setItem('dac_pending_payment_code', EXPECTED_CODE); } catch (e) {}
+    try { localStorage.setItem('dac_payment_trigger', 'sticker'); } catch (e) {}
+    window.open(STRIPE_LINK + '?client_reference_id=' + encodeURIComponent(EXPECTED_CODE), '_blank');
     document.getElementById('btn-sticker-pay').style.display = 'none';
     document.getElementById('sticker-waiting').style.display = 'flex';
   };
 
-  window.consumePrint = function() { window.print(); };
+  function showPayError(msg) {
+    document.getElementById('verifying-bar').style.display   = 'none';
+    document.getElementById('pay-bar').style.display         = 'flex';
+    document.getElementById('btn-sticker-pay').style.display = 'flex';
+    document.getElementById('btn-sticker-pay').style.fontSize = '12px';
+    document.getElementById('btn-sticker-pay').textContent   = msg;
+    document.getElementById('sticker-waiting').style.display = 'none';
+  }
 
   function unlockSticker() {
-    var wm = document.getElementById('sticker-wm');
-    if (wm) wm.remove();
-    var pb = document.getElementById('print-block');
-    if (pb) pb.remove();
+    var wm = document.getElementById('sticker-wm');    if (wm) wm.remove();
+    var pb = document.getElementById('print-block');   if (pb) pb.remove();
+
     var s = document.createElement('style');
-    s.textContent = '@media print { #pay-bar { display:none!important; } #sticker-unlocked { display:none!important; } body { background:#fff!important; } }';
+    s.textContent = '@media print{#pay-bar{display:none!important}#sticker-unlocked{display:none!important}#verifying-bar{display:none!important}body{background:#fff!important}}';
     document.head.appendChild(s);
-    document.getElementById('sticker-waiting').style.display = 'none';
+
+    document.getElementById('verifying-bar').style.display    = 'none';
+    document.getElementById('pay-bar').style.display          = 'none';
     document.getElementById('sticker-unlocked').style.display = 'block';
   }
+
+  window.consumePrint = function () { window.print(); };
 
 })();
 </script>
