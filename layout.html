@@ -308,7 +308,7 @@
 
     <div class="layout-footer">
       <span>dacgrenada.github.io/Dac</span>
-      <span>dac.grenada@gmail.com</span>
+      <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5d393c3e733a2f38333c393c1d3a303c3431733e3230">[email&#160;protected]</a></span>
       <span id="inf-footer">—</span>
     </div>
   </div>
@@ -344,6 +344,10 @@
       </button>
     </div>
 
+  <div id="verifying-bar" style="display:none;max-width:860px;margin:18px auto 0;background:rgba(240,165,0,0.08);border:1px solid rgba(240,165,0,0.3);border-radius:8px;padding:14px 18px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#f0a500;letter-spacing:0.06em;">
+    🔐 Verifying payment with server…
+  </div>
+
   </div>
 
 </div><!-- #layout-root -->
@@ -352,133 +356,108 @@
 (function() {
   'use strict';
 
-  // ── 1. Load data from localStorage ────────────────────────────────────────
+  var SUPABASE_URL = 'https://duoggvkkvyvicpfoawuv.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
+  var STRIPE_LINK  = 'https://buy.stripe.com/fZu3cp19C4PN10z0Ot5wI00';
+
+  // 1. Load data
   var raw = null;
   try { raw = localStorage.getItem('dac_layout_data'); } catch(e) {}
-
-  if (!raw) {
-    document.getElementById('error-screen').style.display = 'flex';
-    return;
-  }
-
+  if (!raw) { document.getElementById('error-screen').style.display = 'flex'; return; }
   var d;
-  try { d = JSON.parse(raw); } catch(e) {
-    document.getElementById('error-screen').style.display = 'flex';
-    return;
-  }
+  try { d = JSON.parse(raw); } catch(e) { document.getElementById('error-screen').style.display = 'flex'; return; }
 
   document.getElementById('layout-root').style.display = 'block';
 
-  // ── 2. Populate fields ────────────────────────────────────────────────────
+  // 2. Populate fields
   document.title = 'DAC Layout – ' + d.code;
-  document.getElementById('hdr-code').textContent  = d.code;
-  document.getElementById('inf-code').textContent  = d.code;
+  document.getElementById('hdr-code').textContent   = d.code;
+  document.getElementById('inf-code').textContent   = d.code;
   document.getElementById('inf-region').textContent = d.regionName;
-  document.getElementById('inf-lat').textContent   = d.lat;
-  document.getElementById('inf-lng').textContent   = d.lng;
-  document.getElementById('inf-date').textContent  = d.dateStr;
+  document.getElementById('inf-lat').textContent    = d.lat;
+  document.getElementById('inf-lng').textContent    = d.lng;
+  document.getElementById('inf-date').textContent   = d.dateStr;
   document.getElementById('inf-footer').textContent = d.code + ' · ' + d.lat + ', ' + d.lng;
-  document.getElementById('sat-label').textContent = '📡 SATELLITE VIEW · ZOOM ' + d.zoom;
+  document.getElementById('sat-label').textContent  = '📡 SATELLITE VIEW · ZOOM ' + d.zoom;
   document.getElementById('sat-coords').textContent = d.lat + ', ' + d.lng;
 
-  // Satellite image
   var satImg = document.getElementById('sat-img');
   satImg.src = d.staticMapUrl;
 
-  // Street view
   if (d.svStaticUrl) {
-    var svWrap = document.getElementById('sv-wrap');
-    var svImg  = document.getElementById('sv-img');
-    svWrap.style.display = 'block';
-    svImg.src = d.svStaticUrl;
+    document.getElementById('sv-wrap').style.display = 'block';
+    document.getElementById('sv-img').src = d.svStaticUrl;
   }
 
-  // QR
   var qrHolder = document.getElementById('qr-holder');
   if (d.qrDataUrl) {
     var qrImg = document.createElement('img');
     qrImg.src = d.qrDataUrl;
     qrImg.style.cssText = 'width:100px;height:100px;border:3px solid #f0a500;border-radius:6px;padding:4px;background:#fff;display:block;';
     qrHolder.replaceWith(qrImg);
-  } else {
-    qrHolder.textContent = 'Scan for directions';
-  }
+  } else { qrHolder.textContent = 'Scan for directions'; }
 
-  // ── 3. If already paid, skip payment UI ───────────────────────────────────
-  if (d.isPaid) {
-    document.getElementById('pay-bar').style.display   = 'none';
-    document.getElementById('wm-overlay').style.display = 'none';
-    var bs = document.getElementById('print-block-style');
-    if (bs) bs.remove();
-    injectPaidPrintCSS();
-    return;
-  }
+  // 3. Check URL for token (returning from success.html)
+  var params = new URLSearchParams(window.location.search);
+  var token  = params.get('token') || '';
+  if (token) { showVerifying(); verifyToken(token, d.code); return; }
 
-  // ── 4. Payment flow ───────────────────────────────────────────────────────
-  var STRIPE_LINK   = d.stripeLink || 'https://buy.stripe.com/fZu3cp19C4PN10z0Ot5wI00';
-  var EXPECTED_CODE = d.code;
+  // 4. Payment flow
   var paymentStarted = false;
-  var unlocked       = false;
-
-  // Check if already paid (e.g. page reload after payment)
-  try {
-    if (localStorage.getItem('dac_paid_' + EXPECTED_CODE) === '1') {
-      // Consume the key immediately — one load = one use
-      try { localStorage.removeItem('dac_paid_' + EXPECTED_CODE); } catch(e) {}
-      unlockLayout();
-      return;
-    }
-  } catch(e) {}
-
-  // Open BroadcastChannel immediately — must be open BEFORE success.html posts
-  var bc = null;
-  try {
-    bc = new BroadcastChannel('dac_payment');
-    bc.onmessage = function(evt) {
-      if (unlocked) return;
-      var msg = evt.data || {};
-      if (msg.paid) {
-        unlocked = true;
-        try { bc.close(); } catch(e) {}
-        try { localStorage.removeItem('dac_paid_' + EXPECTED_CODE); } catch(e) {}
-        unlockLayout();
-      }
-    };
-  } catch(e) {}
-
-  // localStorage storage-event fallback (same origin, different tab)
-  window.addEventListener('storage', function(e) {
-    if (unlocked) return;
-    if (e.key === 'dac_paid_' + EXPECTED_CODE && e.newValue === '1') {
-      unlocked = true;
-      unlockLayout();
-    }
-  });
 
   window.startPayment = function() {
     if (paymentStarted) return;
     paymentStarted = true;
-    try { localStorage.setItem('dac_pending_payment_code', EXPECTED_CODE); } catch(e) {}
+    try { localStorage.setItem('dac_pending_payment_code', d.code); } catch(e) {}
     try { localStorage.setItem('dac_payment_trigger', 'layout'); } catch(e) {}
-    window.open(STRIPE_LINK, '_blank');
+    window.open(STRIPE_LINK + '?client_reference_id=' + encodeURIComponent(d.code), '_blank');
     document.getElementById('btn-pay-unlock').style.display = 'none';
     document.getElementById('waiting-bar').style.display    = 'flex';
   };
 
+  // 5. Server-side token verification
+  function verifyToken(token, dacCode) {
+    fetch(SUPABASE_URL + '/rest/v1/dac_payments?token=eq.' + encodeURIComponent(token) +
+          '&dac_code=eq.' + encodeURIComponent(dacCode) +
+          '&used=eq.false&product=eq.layout&select=id,token,used', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(rows) {
+      if (!rows || rows.length === 0) { showError('Payment not found or already used. Please pay again or contact support.'); return; }
+      markTokenUsed(rows[0].id, function() { unlockLayout(); });
+    })
+    .catch(function() { showError('Could not verify payment. Please check your connection.'); });
+  }
+
+  function markTokenUsed(rowId, cb) {
+    fetch(SUPABASE_URL + '/rest/v1/dac_payments?id=eq.' + rowId, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ used: true, used_at: new Date().toISOString() })
+    }).then(function() { cb(); }).catch(function() { cb(); });
+  }
+
+  function showVerifying() {
+    document.getElementById('pay-bar').style.display        = 'none';
+    document.getElementById('verifying-bar').style.display  = 'block';
+  }
+
+  function showError(msg) {
+    document.getElementById('verifying-bar').style.display  = 'none';
+    document.getElementById('pay-bar').style.display        = 'block';
+    document.getElementById('btn-pay-unlock').style.display = 'flex';
+    document.getElementById('btn-pay-unlock').textContent   = '⚠ ' + msg;
+    document.getElementById('waiting-bar').style.display    = 'none';
+  }
+
   function unlockLayout() {
-    // Remove watermark
-    var wm = document.getElementById('wm-overlay');
-    if (wm) wm.remove();
-
-    // Remove print blocker
-    var bs = document.getElementById('print-block-style');
-    if (bs) bs.remove();
-
+    var wm = document.getElementById('wm-overlay'); if (wm) wm.remove();
+    var bs = document.getElementById('print-block-style'); if (bs) bs.remove();
     injectPaidPrintCSS();
-
-    // Update UI
-    document.getElementById('waiting-bar').style.display = 'none';
-    document.getElementById('paid-banner').style.display = 'block';
+    document.getElementById('verifying-bar').style.display = 'none';
+    document.getElementById('pay-bar').style.display       = 'none';
+    document.getElementById('paid-banner').style.display   = 'block';
   }
 
   window.consumePrint = function() { window.print(); };
@@ -491,6 +470,7 @@
       '  html, body { background: #fff !important; padding: 0 !important; margin: 0 !important; width: 210mm !important; }',
       '  body { display: block !important; color: #000 !important; }',
       '  #pay-bar { display: none !important; }',
+      '  #verifying-bar { display: none !important; }',
       '  .layout-card { border: 1.5px solid #c87700 !important; width: 186mm !important; max-width: 186mm !important; margin: 0 auto !important; background: #fff !important; border-radius: 6px !important; box-shadow: none !important; overflow: hidden !important; }',
       '  .layout-header { background: #1a1a2e !important; border-color: #c87700 !important; padding: 8px 16px !important; }',
       '  .header-left .logo { color: #c87700 !important; font-size: 22px !important; }',
@@ -507,10 +487,12 @@
       '  .field-value.highlight { color: #c87700 !important; font-size: 13px !important; }',
       '  .field-value.seafoam { color: #1a8a6e !important; }',
       '  .qr-panel img { width: 85px !important; height: 85px !important; }',
-      '  .layout-footer { background: #f8f8f8 !important; padding: 6px 16px !important; }',
-      '  .layout-footer span { color: #555 !important; font-size: 8px !important; }',
+      '  .layout-footer { background: #f8f8f8 !important; border-color: #ddd !important; }',
+      '  .layout-footer span { color: #555 !important; }',
+      '  #paid-banner { display: none !important; }',
       '}'
-    ].join('\n');
+    ].join('
+');
     document.head.appendChild(s);
   }
 
