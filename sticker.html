@@ -38,8 +38,6 @@
     .sticker-qr    { width: 160px; height: 160px; margin: 0 auto 12px; display: block; border: 2px solid #f0a500; border-radius: 8px; padding: 6px; background: #fff; }
     .sticker-coords { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: #555; margin-top: 4px; }
     .sticker-scan  { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: #888; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.1em; }
-    .sticker-web   { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; color: #c87700; margin-top: 6px; letter-spacing: 0.06em; }
-    .sticker-email { font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; color: #7a92b4; margin-top: 2px; letter-spacing: 0.05em; }
     .sticker-date  { font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; color: #aaa; margin-top: 8px; border-top: 1px dashed #eee; padding-top: 8px; }
 
     /* Watermark */
@@ -89,6 +87,14 @@
       border: none; border-radius: 8px; cursor: pointer;
     }
 
+    /* Verifying state */
+    .verifying-bar {
+      display: none; width: 100%; max-width: 320px;
+      background: rgba(240,165,0,0.08); border: 1px solid rgba(240,165,0,0.3);
+      border-radius: 8px; padding: 14px 16px; text-align: center;
+      font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #f0a500;
+    }
+
     /* Error */
     .error-screen {
       display: flex; flex-direction: column;
@@ -101,7 +107,7 @@
     .error-screen p  { font-size: 0.82rem; color: #7a92b4; max-width: 340px; }
   </style>
 
-  <!-- Print blocker — removed after payment -->
+  <!-- Print blocker — removed only after server confirms payment -->
   <style id="print-block">
     @media print {
       body * { visibility: hidden !important; }
@@ -132,8 +138,6 @@
     <div id="stk-qr-holder" style="width:160px;height:160px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;background:#f5f5f5;border:2px solid #f0a500;border-radius:8px;font-size:10px;color:#aaa;">Loading…</div>
     <div class="sticker-coords" id="stk-coords"></div>
     <div class="sticker-scan">📱 Scan for directions</div>
-    <div class="sticker-web">🌐 dacgrenada.github.io/Dac</div>
-    <div class="sticker-email">✉ dac.grenada@gmail.com</div>
     <div class="sticker-date" id="stk-date"></div>
   </div>
 
@@ -153,9 +157,14 @@
     </div>
   </div>
 
+  <!-- Verifying token from server -->
+  <div class="verifying-bar" id="verifying-bar">
+    🔐 Verifying payment with server…
+  </div>
+
   <div class="unlocked-bar" id="sticker-unlocked">
     <div class="unlocked-title">✅ Sticker Unlocked!</div>
-    <button class="btn-print-now" onclick="consumePrint()">🖨 Print Sticker</button>
+    <button class="btn-print-now" onclick="doPrint()">🖨 Print Sticker</button>
   </div>
 
 </div><!-- #sticker-root -->
@@ -164,7 +173,12 @@
 (function() {
   'use strict';
 
-  // ── 1. Load data ──────────────────────────────────────────────────────────
+  // ── Config ────────────────────────────────────────────────
+  var SUPABASE_URL  = 'https://duoggvkkvyvicpfoawuv.supabase.co';
+  var SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
+  var STRIPE_LINK   = 'https://buy.stripe.com/fZu3cp19C4PN10z0Ot5wI00';
+
+  // ── 1. Load sticker data ──────────────────────────────────
   var raw = null;
   try { raw = localStorage.getItem('dac_sticker_data'); } catch(e) {}
 
@@ -182,7 +196,7 @@
   document.getElementById('sticker-root').style.display = 'contents';
   document.title = 'DAC Sticker – ' + d.code;
 
-  // ── 2. Populate ───────────────────────────────────────────────────────────
+  // ── 2. Populate sticker ───────────────────────────────────
   document.getElementById('stk-code').textContent   = d.code;
   document.getElementById('stk-coords').textContent = d.lat + ', ' + d.lng;
   document.getElementById('stk-date').textContent   = 'Generated ' + d.dateStr;
@@ -198,70 +212,107 @@
     qrHolder.textContent = 'QR unavailable';
   }
 
-  // ── 3. Payment flow ───────────────────────────────────────────────────────
-  var STRIPE_LINK    = d.stripeLink || 'https://buy.stripe.com/fZu3cp19C4PN10z0Ot5wI00';
-  var EXPECTED_CODE  = d.code;
+  // ── 3. Check URL for token (coming back from success.html) ─
+  var params = new URLSearchParams(window.location.search);
+  var token  = params.get('token') || '';
+
+  if (token) {
+    // Verify token server-side
+    showVerifying();
+    verifyToken(token, d.code);
+    return;
+  }
+
+  // ── 4. Payment flow ───────────────────────────────────────
   var paymentStarted = false;
-  var unlocked       = false;
-
-  // Check if already paid (e.g. page reload after payment)
-  try {
-    if (localStorage.getItem('dac_sticker_paid_' + EXPECTED_CODE) === '1') {
-      // Consume the key immediately — one load = one use
-      try { localStorage.removeItem('dac_sticker_paid_' + EXPECTED_CODE); } catch(e) {}
-      unlockSticker();
-      return;
-    }
-  } catch(e) {}
-
-  // Open BroadcastChannel immediately so it's ready when success.html posts
-  var bc = null;
-  try {
-    bc = new BroadcastChannel('dac_sticker_payment');
-    bc.onmessage = function(evt) {
-      if (unlocked) return;
-      var msg = evt.data || {};
-      if (msg.paid) {
-        unlocked = true;
-        try { bc.close(); } catch(e) {}
-        try { localStorage.removeItem('dac_sticker_paid_' + EXPECTED_CODE); } catch(e) {}
-        unlockSticker();
-      }
-    };
-  } catch(e) {}
-
-  // localStorage storage-event fallback
-  window.addEventListener('storage', function(e) {
-    if (unlocked) return;
-    if (e.key === 'dac_sticker_paid_' + EXPECTED_CODE && e.newValue === '1') {
-      unlocked = true;
-      unlockSticker();
-    }
-  });
 
   window.startPayment = function() {
     if (paymentStarted) return;
     paymentStarted = true;
-    try { localStorage.setItem('dac_pending_payment_code', EXPECTED_CODE); } catch(e) {}
+    // Store code so success.html can pass it back
+    try { localStorage.setItem('dac_pending_payment_code', d.code); } catch(e) {}
     try { localStorage.setItem('dac_payment_trigger', 'sticker'); } catch(e) {}
-    window.open(STRIPE_LINK, '_blank');
+    // Redirect to Stripe — success.html will redirect back with ?token=xxx
+    window.open(STRIPE_LINK + '?client_reference_id=' + encodeURIComponent(d.code), '_blank');
     document.getElementById('btn-sticker-pay').style.display = 'none';
     document.getElementById('sticker-waiting').style.display = 'flex';
   };
 
-  window.consumePrint = function() { window.print(); };
+  // ── 5. Server-side token verification ─────────────────────
+  function verifyToken(token, dacCode) {
+    fetch(SUPABASE_URL + '/rest/v1/dac_payments?token=eq.' + encodeURIComponent(token) +
+          '&dac_code=eq.' + encodeURIComponent(dacCode) +
+          '&used=eq.false&product=eq.sticker&select=id,token,used', {
+      headers: {
+        'apikey':        SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type':  'application/json'
+      }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(rows) {
+      if (!rows || rows.length === 0) {
+        showError('Payment not found or already used. Please pay again or contact support.');
+        return;
+      }
+      var row = rows[0];
+      // Mark token as used immediately (one print only)
+      markTokenUsed(row.id, function() {
+        unlockSticker();
+      });
+    })
+    .catch(function(err) {
+      showError('Could not verify payment. Please check your connection.');
+      console.error(err);
+    });
+  }
+
+  function markTokenUsed(rowId, callback) {
+    fetch(SUPABASE_URL + '/rest/v1/dac_payments?id=eq.' + rowId, {
+      method: 'PATCH',
+      headers: {
+        'apikey':        SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type':  'application/json',
+        'Prefer':        'return=minimal'
+      },
+      body: JSON.stringify({ used: true, used_at: new Date().toISOString() })
+    })
+    .then(function() { callback(); })
+    .catch(function() { callback(); }); // still unlock even if mark fails
+  }
+
+  function showVerifying() {
+    document.getElementById('pay-bar').style.display      = 'none';
+    document.getElementById('verifying-bar').style.display = 'block';
+  }
+
+  function showError(msg) {
+    document.getElementById('verifying-bar').style.display = 'none';
+    document.getElementById('pay-bar').style.display       = 'flex';
+    document.getElementById('btn-sticker-pay').style.display = 'flex';
+    document.getElementById('btn-sticker-pay').textContent  = '⚠ ' + msg;
+    document.getElementById('sticker-waiting').style.display = 'none';
+  }
 
   function unlockSticker() {
+    // Remove watermark
     var wm = document.getElementById('sticker-wm');
     if (wm) wm.remove();
+    // Remove print block
     var pb = document.getElementById('print-block');
     if (pb) pb.remove();
+    // Add clean print styles
     var s = document.createElement('style');
-    s.textContent = '@media print { #pay-bar { display:none!important; } #sticker-unlocked { display:none!important; } body { background:#fff!important; } }';
+    s.textContent = '@media print { #pay-bar{display:none!important} #sticker-unlocked{display:none!important} #verifying-bar{display:none!important} body{background:#fff!important} }';
     document.head.appendChild(s);
-    document.getElementById('sticker-waiting').style.display = 'none';
+    // Show print button
+    document.getElementById('verifying-bar').style.display  = 'none';
+    document.getElementById('pay-bar').style.display        = 'none';
     document.getElementById('sticker-unlocked').style.display = 'block';
   }
+
+  window.doPrint = function() { window.print(); };
 
 })();
 </script>
