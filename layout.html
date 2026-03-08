@@ -308,7 +308,7 @@
 
     <div class="layout-footer">
       <span>dacgrenada.github.io/Dac</span>
-      <span>dac.grenada@gmail.com</span>
+      <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="395d585a175e4b5c57585d58795e54585055175a5654">[email&#160;protected]</a></span>
       <span id="inf-footer">—</span>
     </div>
   </div>
@@ -348,7 +348,7 @@
 
 </div><!-- #layout-root -->
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 (function() {
   'use strict';
 
@@ -483,7 +483,7 @@
   }
 
   // ── 7. Normal payment flow ────────────────────────────────────────────────
-  var STRIPE_LINK   = (d && d.stripeLink) || 'https://buy.stripe.com/fZu3cp19C4PN10z0Ot5wI00';
+  var STRIPE_LINK   = (d && d.stripeLink) || 'https://buy.stripe.com/8x26oB05y81Z4cL7cR5wI04';
   var EXPECTED_CODE = d ? d.code : '';
   var paymentStarted = false;
   var unlocked       = false;
@@ -576,15 +576,4 @@
       '  .field-value.seafoam { color: #1a8a6e !important; }',
       '  .qr-panel img { width: 85px !important; height: 85px !important; }',
       '  .layout-footer { background: #f8f8f8 !important; border-color: #ddd !important; padding: 6px 16px !important; }',
-      '  .layout-footer span { color: #555 !important; font-size: 8px !important; }',
-      '  #pay-bar { display: none !important; }',
-      '  .print-btn { display: none !important; }',
-      '}'
-    ].join('\n');
-    document.head.appendChild(s);
-  }
-
-})();
-</script>
-</body>
-</html>
+      '  .layout-footer span { color: #555 !important;
