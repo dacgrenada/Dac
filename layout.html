@@ -308,7 +308,7 @@
 
     <div class="layout-footer">
       <span>dacgrenada.github.io/Dac</span>
-      <span>dac.grenada@gmail.com</span>
+      <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9bfffaf8b5fce9fef5fafffadbfcf6faf2f7b5f8f4f6">[email&#160;protected]</a></span>
       <span id="inf-footer">—</span>
     </div>
   </div>
@@ -348,7 +348,7 @@
 
 </div><!-- #layout-root -->
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 (function() {
   'use strict';
 
@@ -412,6 +412,55 @@
     if (bs) bs.remove();
     injectPaidPrintCSS();
     return;
+  }
+
+  // ── 3b. Token-in-URL flow (admin free unlock / success.html redirect) ─────
+  var SUPABASE_URL = 'https://duoggvkkvyvicpfoawuv.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
+  var urlToken = new URLSearchParams(window.location.search).get('token') || '';
+
+  if (urlToken) {
+    // Hide pay bar, show verifying indicator
+    document.getElementById('pay-bar').style.display = 'none';
+    var verifyEl = document.createElement('div');
+    verifyEl.id = 'verifying-bar';
+    verifyEl.style.cssText = 'max-width:860px;margin:14px auto 0;text-align:center;font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:#f0a500;letter-spacing:0.06em;';
+    verifyEl.textContent = '🔐 Verifying payment token…';
+    document.getElementById('layout-root').appendChild(verifyEl);
+
+    fetch(SUPABASE_URL + '/rest/v1/dac_payments?token=eq.' + encodeURIComponent(urlToken) + '&select=id,dac_code,used,product', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(rows) {
+      if (!rows || rows.length === 0) { showTokenError('Token not found. Please generate a new one.'); return; }
+      var row = rows[0];
+      if (row.used)                   { showTokenError('This token has already been used.'); return; }
+      if (row.product !== 'layout')   { showTokenError('Wrong token type: ' + row.product); return; }
+
+      // Mark token used, then unlock
+      fetch(SUPABASE_URL + '/rest/v1/dac_payments?id=eq.' + row.id, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ used: true, used_at: new Date().toISOString() })
+      })
+      .then(function() { unlockLayout(); })
+      .catch(function() { unlockLayout(); }); // unlock anyway if PATCH fails
+    })
+    .catch(function() { showTokenError('Could not verify token. Check your connection.'); });
+
+    function showTokenError(msg) {
+      var vb = document.getElementById('verifying-bar');
+      if (vb) { vb.style.color = '#e85d3a'; vb.textContent = '⚠ ' + msg; }
+      document.getElementById('pay-bar').style.display = 'flex';
+    }
+
+    return; // stop here — unlockLayout() will be called async
   }
 
   // ── 4. Payment flow ───────────────────────────────────────────────────────
@@ -507,14 +556,4 @@
       '  .field-value.highlight { color: #c87700 !important; font-size: 13px !important; }',
       '  .field-value.seafoam { color: #1a8a6e !important; }',
       '  .qr-panel img { width: 85px !important; height: 85px !important; }',
-      '  .layout-footer { background: #f8f8f8 !important; padding: 6px 16px !important; }',
-      '  .layout-footer span { color: #555 !important; font-size: 8px !important; }',
-      '}'
-    ].join('\n');
-    document.head.appendChild(s);
-  }
-
-})();
-</script>
-</body>
-</html>
+      '  .layout-footer { background: #f8f8f8
