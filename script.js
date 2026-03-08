@@ -512,12 +512,6 @@ function initMap() {
   map.addListener('click', handleMapClick);
   drawParishBoxes();
 
-  // Add instruction bar as a custom control below the map type (satellite) buttons
-  const instrDiv = document.createElement('div');
-  instrDiv.className = 'map-instruction';
-  instrDiv.innerHTML = '<span class="pulse-dot"></span> Click anywhere on the map to generate a permanent unique DAC Address Code';
-  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(instrDiv);
-
   console.log('%cDAC – Digital Address Codes v3.0 — Global CC-PPP-XXXXXX Format', 'color:#f0a500;font-weight:bold;font-size:14px;');
 }
 
@@ -783,9 +777,7 @@ function saveCurrentCodeForPayment(code) {
 }
 
 // ============================================================
-// SECTION 13 — SMART SEARCH
-// Supports: Full DAC (GD-STG-123456), no-dash (GDSTG123456),
-//           last 6 digits (123456), address text, GPS (lat,lng)
+// SECTION 13 — SEARCH
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -793,148 +785,29 @@ document.addEventListener('DOMContentLoaded', () => {
   const inputSearch = document.getElementById('code-search');
   if (!btnSearch || !inputSearch) return;
 
-  // ── Helpers ──────────────────────────────────────────────────
-
-  /** Normalise raw input → canonical CC-PPP-XXXXXX or null */
-  function normaliseDacCode(raw) {
-    const s = raw.replace(/\s/g, '').toUpperCase();
-
-    // Full format with dashes: GD-STG-123456
-    if (/^[A-Z]{2}-[A-Z]{3}-[A-Z0-9]{6}$/.test(s)) return s;
-
-    // Without dashes: GDSTG123456  (11 chars)
-    if (/^[A-Z]{2}[A-Z]{3}[A-Z0-9]{6}$/.test(s)) {
-      return `${s.slice(0,2)}-${s.slice(2,5)}-${s.slice(5)}`;
-    }
-
-    return null;
-  }
-
-  /** Scan all registry entries for a code ending in the 6-char suffix */
-  function findBySuffix(suffix) {
-    try {
-      const registry = loadRegistry();
-      for (const key of Object.keys(registry)) {
-        const entry = registry[key];
-        if (entry && entry.code && entry.code.slice(-6) === suffix) return entry;
-      }
-    } catch (e) {}
-    return null;
-  }
-
-  /** Parse "lat,lng" GPS string → {lat, lng} or null */
-  function parseGPS(raw) {
-    const m = raw.match(/^(-?\d+(?:\.\d+)?)\s*[,\s]\s*(-?\d+(?:\.\d+)?)$/);
-    if (!m) return null;
-    const lat = parseFloat(m[1]);
-    const lng = parseFloat(m[2]);
-    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
-    return { lat, lng };
-  }
-
-  /** Land a pin at lat/lng, just like a map click */
-  function landAt(lat, lng) {
-    const { countryCode, regionCode, regionName } = getLocationInfo(lat, lng);
-    const region  = { code: regionCode, name: regionName };
-    const code    = getOrCreateLocationCode(lat, lng, region, countryCode);
-    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-
-    currentRegion = region;
-    map.panTo({ lat, lng });
-    map.setZoom(18);
-    placeMarker(lat, lng, code, region);
-    generateQRCode(mapsUrl);
-    updateUI({ code, lat, lng, region, countryCode, mapsUrl });
-    updateStreetView(lat, lng);
-    showToast(`📍 ${code}`);
-  }
-
-  /** Geocode an address string via Google Maps Geocoding API */
-  function geocodeAddress(query, callback) {
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ address: query }, (results, status) => {
-      if (status === 'OK' && results && results.length > 0) {
-        const loc = results[0].geometry.location;
-        callback(null, { lat: loc.lat(), lng: loc.lng(), formatted: results[0].formatted_address });
-      } else {
-        callback(`Geocode failed: ${status}`);
-      }
-    });
-  }
-
-  // ── Main search logic ─────────────────────────────────────────
-
   function doSearch() {
-    const raw = inputSearch.value.trim();
-    if (!raw) return;
+    const code = inputSearch.value.trim().toUpperCase();
+    if (!code) return;
 
-    // 1. Try full or dash-less DAC code
-    const canon = normaliseDacCode(raw);
-    if (canon) {
-      const entry = lookupCodeInRegistry(canon);
-      if (entry) {
-        const lat     = entry.lat;
-        const lng     = entry.lng;
-        const region  = { code: entry.parish, name: entry.parishName };
-        const country = entry.country || 'GD';
-        const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    const entry = lookupCodeInRegistry(code);
+    if (entry) {
+      const lat     = entry.lat;
+      const lng     = entry.lng;
+      const region  = { code: entry.parish, name: entry.parishName };
+      const country = entry.country || 'GD';
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 
-        map.panTo({ lat, lng });
-        map.setZoom(18);
-        currentRegion = region;
-        placeMarker(lat, lng, canon, region);
-        generateQRCode(mapsUrl);
-        updateUI({ code: canon, lat, lng, region, countryCode: country, mapsUrl });
-        updateStreetView(lat, lng);
-        showToast(`Loaded: ${canon}`);
-        return;
-      }
-      showToast('DAC code not found in local registry');
-      return;
+      map.panTo({ lat, lng });
+      map.setZoom(18);
+      currentRegion = region;
+      placeMarker(lat, lng, code, region);
+      generateQRCode(mapsUrl);
+      updateUI({ code, lat, lng, region, countryCode: country, mapsUrl });
+      updateStreetView(lat, lng);
+      showToast(`Loaded: ${code}`);
+    } else {
+      showToast('Code not found in local registry');
     }
-
-    // 2. Try last-6-digits suffix (alphanumeric, exactly 6 chars)
-    const s = raw.replace(/\s/g, '').toUpperCase();
-    if (/^[A-Z0-9]{6}$/.test(s)) {
-      const entry = findBySuffix(s);
-      if (entry) {
-        const lat     = entry.lat;
-        const lng     = entry.lng;
-        const region  = { code: entry.parish, name: entry.parishName };
-        const country = entry.country || 'GD';
-        const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-
-        map.panTo({ lat, lng });
-        map.setZoom(18);
-        currentRegion = region;
-        placeMarker(lat, lng, entry.code, region);
-        generateQRCode(mapsUrl);
-        updateUI({ code: entry.code, lat, lng, region, countryCode: country, mapsUrl });
-        updateStreetView(lat, lng);
-        showToast(`Loaded: ${entry.code}`);
-        return;
-      }
-      // Fall through — might be an address that looks like 6 alphanumerics
-    }
-
-    // 3. Try GPS coordinates: "12.0526,-61.7488" or "12.0526 -61.7488"
-    const gps = parseGPS(raw);
-    if (gps) {
-      landAt(gps.lat, gps.lng);
-      showToast(`📍 GPS: ${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}`);
-      return;
-    }
-
-    // 4. Address / place name — geocode it
-    showToast('🔍 Searching address…');
-    geocodeAddress(raw, (err, result) => {
-      if (err) {
-        showToast('Address not found');
-        return;
-      }
-      landAt(result.lat, result.lng);
-      showToast(`📍 ${result.formatted}`);
-    });
   }
 
   btnSearch.onclick = doSearch;

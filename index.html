@@ -24,6 +24,10 @@
   <main class="app-main">
 
     <section class="map-panel">
+      <div class="map-instruction">
+        <span class="pulse-dot"></span>
+        Click anywhere on the map to generate a permanent unique DAC Address Code
+      </div>
       <div id="map"></div>
 
       <!-- Street View Panel -->
@@ -49,7 +53,7 @@
 
       <div class="card action-card">
         <div class="search-row">
-          <input id="code-search" type="text" placeholder="Search DAC code, last 6 digits, address, or GPS (lat,lng)" />
+          <input id="code-search" type="text" placeholder="Enter DAC Address Code (GD-STG-XXXXXX)" />
           <button class="btn btn-secondary" id="btn-search">Search</button>
         </div>
       </div>
@@ -120,11 +124,16 @@
 
   <footer class="app-footer">
     <p class="footer-tech">Built with Google Maps Platform · DAC Grid System v3.0 · CC-PPP-XXXXXX Global Format</p>
-    <p>DAC – Digital Address Codes &nbsp;|&nbsp; Support: <a href="/cdn-cgi/l/email-protection#8aeeebe9a4edf8efe4ebeeebcaede7ebe3e6a4e9e5e7"><span class="__cf_email__" data-cfemail="d7b3b6b4f9b0a5b2b9b6b3b697b0bab6bebbf9b4b8ba">[email&#160;protected]</span></a></p>
+    <p>DAC – Digital Address Codes &nbsp;|&nbsp; Support: <a href="mailto:dac.grenada@gmail.com">dac.grenada@gmail.com</a></p>
   </footer>
 
   <div class="toast" id="toast"></div>
 
   <!-- QR Code library -->
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Google Maps — triggers initMap() in script.js -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJfcDVXsepgm5a9qGt2bfaRFtOKOfo-sw&callback=initMap" async defer></script>
+  <script src="script.js"></script>
+
+</body>
+</html>

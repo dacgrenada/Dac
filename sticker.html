@@ -133,7 +133,7 @@
     <div class="sticker-coords" id="stk-coords"></div>
     <div class="sticker-scan">📱 Scan for directions</div>
     <div class="sticker-web">🌐 dacgrenada.github.io/Dac</div>
-    <div class="sticker-email">✉ <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3f5b5e5c11584d5a515e5b5e7f58525e5653115c5052">[email&#160;protected]</a></div>
+    <div class="sticker-email">✉ dac.grenada@gmail.com</div>
     <div class="sticker-date" id="stk-date"></div>
   </div>
 
@@ -160,7 +160,7 @@
 
 </div><!-- #sticker-root -->
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 (function() {
   'use strict';
 
@@ -257,4 +257,13 @@
     var pb = document.getElementById('print-block');
     if (pb) pb.remove();
     var s = document.createElement('style');
-    s.textContent = '@media print { #pay-bar { display:none!important; } #sticker-unlocked { display:none!important; } body { background:#fff!
+    s.textContent = '@media print { #pay-bar { display:none!important; } #sticker-unlocked { display:none!important; } body { background:#fff!important; } }';
+    document.head.appendChild(s);
+    document.getElementById('sticker-waiting').style.display = 'none';
+    document.getElementById('sticker-unlocked').style.display = 'block';
+  }
+
+})();
+</script>
+</body>
+</html>

@@ -36,8 +36,8 @@
   </div>
   <p id="countdown-msg"></p>
 </div>
-<p class="footer-note">DAC – Digital Address Codes · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="731712105d1401161d12171233141e121a1f5d101c1e">[email&#160;protected]</a></p>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<p class="footer-note">DAC – Digital Address Codes · dac.grenada@gmail.com</p>
+<script>
 (function() {
   // 1. Resolve DAC code
   var params = new URLSearchParams(window.location.search);
@@ -86,4 +86,16 @@
   var secs = 4;
   var countEl = document.getElementById('countdown-msg');
   countEl.textContent = 'Returning in ' + secs + 's…';
-  var timer = setInterval(functi
+  var timer = setInterval(function() {
+    secs--;
+    if (secs > 0) {
+      countEl.textContent = 'Returning in ' + secs + 's…';
+    } else {
+      clearInterval(timer);
+      window.location.href = returnPage;
+    }
+  }, 1000);
+})();
+</script>
+</body>
+</html>
