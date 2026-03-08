@@ -353,47 +353,47 @@
   'use strict';
 
   // ── 1. Load data from localStorage ────────────────────────────────────────
+  // SUPABASE constants
+  var SUPABASE_URL = 'https://duoggvkkvyvicpfoawuv.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
+
+  // 1. Token in URL? (admin unlock / post-payment redirect)
+  var urlToken = new URLSearchParams(window.location.search).get('token') || '';
+
+  // 2. Load localStorage data
   var raw = null;
   try { raw = localStorage.getItem('dac_layout_data'); } catch(e) {}
 
-  if (!raw) {
+  // If no data AND no token — show error screen
+  if (!raw && !urlToken) {
     document.getElementById('error-screen').style.display = 'flex';
     return;
   }
 
-  var d;
-  try { d = JSON.parse(raw); } catch(e) {
-    document.getElementById('error-screen').style.display = 'flex';
-    return;
-  }
+  var d = {};
+  if (raw) { try { d = JSON.parse(raw); } catch(e) { d = {}; } }
 
   document.getElementById('layout-root').style.display = 'block';
 
-  // ── 2. Populate fields ────────────────────────────────────────────────────
-  document.title = 'DAC Layout – ' + d.code;
-  document.getElementById('hdr-code').textContent  = d.code;
-  document.getElementById('inf-code').textContent  = d.code;
-  document.getElementById('inf-region').textContent = d.regionName;
-  document.getElementById('inf-lat').textContent   = d.lat;
-  document.getElementById('inf-lng').textContent   = d.lng;
-  document.getElementById('inf-date').textContent  = d.dateStr;
-  document.getElementById('inf-footer').textContent = d.code + ' · ' + d.lat + ', ' + d.lng;
-  document.getElementById('sat-label').textContent = '📡 SATELLITE VIEW · ZOOM ' + d.zoom;
-  document.getElementById('sat-coords').textContent = d.lat + ', ' + d.lng;
+  // 3. Populate fields (safe defaults — d may be empty in token-only flow)
+  document.title = 'DAC Layout' + (d.code ? ' \u2013 ' + d.code : '');
+  document.getElementById('hdr-code').textContent   = d.code       || '\u2014';
+  document.getElementById('inf-code').textContent   = d.code       || '\u2014';
+  document.getElementById('inf-region').textContent = d.regionName || '\u2014';
+  document.getElementById('inf-lat').textContent    = d.lat        || '\u2014';
+  document.getElementById('inf-lng').textContent    = d.lng        || '\u2014';
+  document.getElementById('inf-date').textContent   = d.dateStr    || '\u2014';
+  document.getElementById('inf-footer').textContent = d.code ? (d.code + ' \u00b7 ' + d.lat + ', ' + d.lng) : '\u2014';
+  document.getElementById('sat-label').textContent  = '\ud83d\udce1 SATELLITE VIEW' + (d.zoom ? ' \u00b7 ZOOM ' + d.zoom : '');
+  document.getElementById('sat-coords').textContent = (d.lat && d.lng) ? d.lat + ', ' + d.lng : '';
 
-  // Satellite image
-  var satImg = document.getElementById('sat-img');
-  satImg.src = d.staticMapUrl;
+  if (d.staticMapUrl) document.getElementById('sat-img').src = d.staticMapUrl;
 
-  // Street view
   if (d.svStaticUrl) {
-    var svWrap = document.getElementById('sv-wrap');
-    var svImg  = document.getElementById('sv-img');
-    svWrap.style.display = 'block';
-    svImg.src = d.svStaticUrl;
+    document.getElementById('sv-wrap').style.display = 'block';
+    document.getElementById('sv-img').src = d.svStaticUrl;
   }
 
-  // QR
   var qrHolder = document.getElementById('qr-holder');
   if (d.qrDataUrl) {
     var qrImg = document.createElement('img');
@@ -404,28 +404,23 @@
     qrHolder.textContent = 'Scan for directions';
   }
 
-  // ── 3. If already paid, skip payment UI ───────────────────────────────────
+  // 4. Already paid via localStorage flag — skip payment UI
   if (d.isPaid) {
-    document.getElementById('pay-bar').style.display   = 'none';
+    document.getElementById('pay-bar').style.display    = 'none';
     document.getElementById('wm-overlay').style.display = 'none';
-    var bs = document.getElementById('print-block-style');
-    if (bs) bs.remove();
+    var bsPaid = document.getElementById('print-block-style');
+    if (bsPaid) bsPaid.remove();
     injectPaidPrintCSS();
     return;
   }
 
-  // ── 3b. Token-in-URL flow (admin free unlock / success.html redirect) ─────
-  var SUPABASE_URL = 'https://duoggvkkvyvicpfoawuv.supabase.co';
-  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
-  var urlToken = new URLSearchParams(window.location.search).get('token') || '';
-
+  // 5. Token-in-URL flow (admin free unlock OR success.html post-payment)
   if (urlToken) {
-    // Hide pay bar, show verifying indicator
     document.getElementById('pay-bar').style.display = 'none';
     var verifyEl = document.createElement('div');
     verifyEl.id = 'verifying-bar';
-    verifyEl.style.cssText = 'max-width:860px;margin:14px auto 0;text-align:center;font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:#f0a500;letter-spacing:0.06em;';
-    verifyEl.textContent = '🔐 Verifying payment token…';
+    verifyEl.style.cssText = 'max-width:860px;margin:14px auto 0;text-align:center;font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:#f0a500;letter-spacing:0.06em;padding:12px;';
+    verifyEl.textContent = '\ud83d\udd10 Verifying payment token\u2026';
     document.getElementById('layout-root').appendChild(verifyEl);
 
     fetch(SUPABASE_URL + '/rest/v1/dac_payments?token=eq.' + encodeURIComponent(urlToken) + '&select=id,dac_code,used,product', {
@@ -435,35 +430,38 @@
     .then(function(rows) {
       if (!rows || rows.length === 0) { showTokenError('Token not found. Please generate a new one.'); return; }
       var row = rows[0];
-      if (row.used)                   { showTokenError('This token has already been used.'); return; }
-      if (row.product !== 'layout')   { showTokenError('Wrong token type: ' + row.product); return; }
+      if (row.used)                 { showTokenError('This token has already been used.'); return; }
+      if (row.product !== 'layout') { showTokenError('Wrong token type: ' + row.product); return; }
 
-      // Mark token used, then unlock
+      // Fill DAC code from Supabase if localStorage was empty
+      if (!d.code && row.dac_code) {
+        d.code = row.dac_code;
+        document.getElementById('hdr-code').textContent = d.code;
+        document.getElementById('inf-code').textContent = d.code;
+        document.title = 'DAC Layout \u2013 ' + d.code;
+      }
+
+      // Mark token used then unlock
       fetch(SUPABASE_URL + '/rest/v1/dac_payments?id=eq.' + row.id, {
         method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY,
+                   'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
         body: JSON.stringify({ used: true, used_at: new Date().toISOString() })
       })
       .then(function() { unlockLayout(); })
-      .catch(function() { unlockLayout(); }); // unlock anyway if PATCH fails
+      .catch(function() { unlockLayout(); });
     })
     .catch(function() { showTokenError('Could not verify token. Check your connection.'); });
 
     function showTokenError(msg) {
       var vb = document.getElementById('verifying-bar');
-      if (vb) { vb.style.color = '#e85d3a'; vb.textContent = '⚠ ' + msg; }
+      if (vb) { vb.style.color = '#e85d3a'; vb.textContent = '\u26a0 ' + msg; }
       document.getElementById('pay-bar').style.display = 'flex';
     }
-
-    return; // stop here — unlockLayout() will be called async
+    return; // unlockLayout() called async above
   }
 
-  // ── 4. Payment flow ───────────────────────────────────────────────────────
+    // ── 4. Payment flow ───────────────────────────────────────────────────────
   var STRIPE_LINK   = d.stripeLink || 'https://buy.stripe.com/fZu3cp19C4PN10z0Ot5wI00';
   var EXPECTED_CODE = d.code;
   var paymentStarted = false;

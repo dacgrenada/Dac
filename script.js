@@ -984,7 +984,25 @@ function generatePropertyLayout(isPaid = false) {
     }));
   } catch(e) {}
 
-  window.open('layout.html', '_blank');
+  // Check if admin pre-paid a token for this exact code
+  var adminToken = '';
+  try {
+    var storedCode = localStorage.getItem('dac_admin_token_code') || '';
+    if (storedCode.toUpperCase() === (currentCode || '').toUpperCase()) {
+      adminToken = localStorage.getItem('dac_admin_token') || '';
+    }
+  } catch(e) {}
+
+  var layoutUrl = adminToken
+    ? 'layout.html?token=' + encodeURIComponent(adminToken)
+    : 'layout.html';
+
+  // Clear the stored admin token after use
+  if (adminToken) {
+    try { localStorage.removeItem('dac_admin_token'); localStorage.removeItem('dac_admin_token_code'); } catch(e) {}
+  }
+
+  window.open(layoutUrl, '_blank');
 }
 // ============================================================
 // SECTION 18 — LAYOUT BUTTON HANDLER

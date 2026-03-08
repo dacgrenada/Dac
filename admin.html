@@ -428,7 +428,23 @@
         msgEl.className = 'unlock-msg success';
         var targetPage  = product === 'sticker' ? 'sticker.html' : 'layout.html';
         var printUrl    = targetPage + '?token=' + encodeURIComponent(token);
-        msgEl.innerHTML = '✅ Token created! <a href="' + printUrl + '" target="_blank" style="color:var(--saffron);text-decoration:underline;">Click here to print →</a>';
+
+        // For layout: user must have map localStorage data first.
+        // Show two options: direct link (if they already pinned a location)
+        // and a map link to pin first then come back.
+        if (product === 'layout') {
+          // Store token + code in localStorage so map page picks it up automatically
+          try {
+            localStorage.setItem('dac_admin_token', token);
+            localStorage.setItem('dac_admin_token_code', code);
+          } catch(e) {}
+          msgEl.innerHTML =
+            '✅ Token saved for <b style="color:var(--saffron)">' + code + '</b> &nbsp;' +
+            '<a href="index.html" target="_blank" style="color:var(--seafoam);font-weight:700;">→ Open Map to Print</a>' +
+            '<br><span style="font-size:10px;color:var(--dim);">On the map: search or click <b>' + code + '</b>, then click "Generate Property Layout" — it will open watermark-free.</span>';
+        } else {
+          msgEl.innerHTML = '✅ Token created! <a href="' + printUrl + '" target="_blank" style="color:var(--saffron);text-decoration:underline;">Click here to print →</a>';
+        }
         codeInput.value = '';
         loadOrders();
       } else {
