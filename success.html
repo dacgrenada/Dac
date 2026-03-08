@@ -119,3 +119,20 @@
     })
     .catch(function(err) {
       console.error(err);
+      if (attempts < maxAttempts) {
+        setTimeout(pollForToken, 2000);
+      } else {
+        document.getElementById('processing-msg').style.display = 'none';
+        document.getElementById('error-msg').style.display = 'block';
+        document.getElementById('error-msg').textContent = 'Network error. Please email dac.grenada@gmail.com with your DAC code: ' + pendingCode;
+        document.getElementById('sub-msg').textContent = 'Your payment was received ✅';
+      }
+    });
+  }
+
+  pollForToken();
+
+})();
+</script>
+</body>
+</html>

@@ -883,20 +883,6 @@ document.addEventListener('click', (e) => {
     window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
   }
 });
-// ============================================================
-// SECTION 16 — SHARE LOCATION
-// ============================================================
-
-document.addEventListener('click', (e) => {
-  if (e.target.id !== 'btn-share') return;
-  if (!currentMapsUrl) return;
-  const text = `My DAC Address Code: ${currentCode} - ${currentMapsUrl}`;
-  if (navigator.share) {
-    navigator.share({ title: 'DAC – Digital Address Codes', text, url: currentMapsUrl });
-  } else {
-    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
-  }
-});
 
 // ============================================================
 // SECTION 17 — PROPERTY LAYOUT GENERATOR
