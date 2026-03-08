@@ -984,7 +984,7 @@ function generatePropertyLayout(isPaid = false) {
     }));
   } catch(e) {}
 
-  window.open('layout.html', '_blank');
+  window.location.href = 'layout.html';
 }
 // ============================================================
 // SECTION 18 — LAYOUT BUTTON HANDLER
