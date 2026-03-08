@@ -40,15 +40,22 @@
       background: var(--saffron); color: var(--navy);
       font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800;
       border: none; cursor: pointer; letter-spacing: 0.04em;
-      transition: background 0.2s;
+      transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
     }
-    .btn-login:hover { background: var(--saffron-2); }
+    .btn-login:hover:not(:disabled) { background: var(--saffron-2); }
+    .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
     .login-error {
       background: rgba(232,93,58,0.12); border: 1px solid rgba(232,93,58,0.4);
       color: var(--coral); border-radius: 8px; padding: 0.6rem 1rem;
       font-size: 0.82rem; margin-bottom: 1rem; display: none;
       font-family: 'IBM Plex Mono', monospace;
     }
+    .login-spinner {
+      width: 16px; height: 16px; border: 2px solid var(--navy);
+      border-top-color: transparent; border-radius: 50%;
+      animation: spin 0.7s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ── Admin Dashboard ── */
     #admin-screen { display: none; }
@@ -61,6 +68,7 @@
     }
     .admin-logo { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--saffron); }
     .admin-badge { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; background: var(--saffron); color: var(--navy); padding: 3px 10px; border-radius: 100px; font-weight: 700; }
+    .admin-email { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--dim); }
     .btn-logout { background: transparent; border: 1px solid var(--coral); color: var(--coral); padding: 6px 14px; border-radius: 6px; font-size: 0.78rem; cursor: pointer; font-family: 'IBM Plex Mono', monospace; }
 
     .admin-body { padding: 1.5rem; max-width: 1100px; margin: 0 auto; }
@@ -147,10 +155,15 @@
   <div class="login-card">
     <div class="login-logo">🇬🇩 DAC</div>
     <div class="login-sub">Admin Panel · Secure Access</div>
-    <div class="login-error" id="login-error">Incorrect password. Try again.</div>
-    <div class="login-label">Admin Password</div>
-    <input type="password" class="login-input" id="admin-pass" placeholder="Enter your admin password" onkeydown="if(event.key==='Enter')doLogin()"/>
-    <button class="btn-login" onclick="doLogin()">🔐 Login</button>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-label">Email</div>
+    <input type="email" class="login-input" id="admin-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <div class="login-label">Password</div>
+    <input type="password" class="login-input" id="admin-pass" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="btn-login" id="btn-login" onclick="doLogin()">
+      <div class="login-spinner" id="login-spinner"></div>
+      <span id="login-label">🔐 Login</span>
+    </button>
   </div>
 </div>
 
@@ -161,6 +174,7 @@
       <span class="admin-logo">DAC Admin</span>
     </div>
     <div style="display:flex;align-items:center;gap:1rem;">
+      <span class="admin-email" id="admin-email-display"></span>
       <span class="admin-badge">✅ ADMIN</span>
       <button class="btn-logout" onclick="doLogout()">Logout</button>
     </div>
@@ -229,71 +243,92 @@
   </div>
 </div>
 
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 (function() {
   'use strict';
 
-  var SUPABASE_URL     = 'https://duoggvkkvyvicpfoawuv.supabase.co';
-  var SUPABASE_KEY     = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
+  var SUPABASE_URL = 'https://duoggvkkvyvicpfoawuv.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
 
-  // ── Password check (hashed in browser) ───────────────────
-  // We hash the entered password with SHA-256 and compare to stored hash
-  var ADMIN_HASH = 'b3e2f1c4d5a6789012345678901234567890abcdef1234567890abcdef123456'; // SHA-256 of HiYmtYvxpx123!
+  // ── Init Supabase client ──────────────────────────────────
+  var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  async function sha256(str) {
-    var buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-    return Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2,'0')).join('');
-  }
-
-  // Actual hash of HiYmtYvxpx123! — computed correctly
-  var CORRECT_HASH = '';
-  sha256('HiYmtYvxpx123!').then(function(h) { CORRECT_HASH = h; });
-
-  window.doLogin = async function() {
-    var pass = document.getElementById('admin-pass').value;
-    var hash = await sha256(pass);
-    if (!CORRECT_HASH) { CORRECT_HASH = await sha256('HiYmtYvxpx123!'); }
-    if (hash === CORRECT_HASH) {
-      sessionStorage.setItem('dac_admin_auth', hash);
-      document.getElementById('login-screen').style.display  = 'none';
-      document.getElementById('admin-screen').style.display  = 'block';
-      loadStats();
-      loadOrders();
-    } else {
-      var err = document.getElementById('login-error');
-      err.style.display = 'block';
-      document.getElementById('admin-pass').value = '';
-      setTimeout(function() { err.style.display = 'none'; }, 3000);
+  // ── Auth state — check if already logged in ───────────────
+  supabase.auth.getSession().then(function(result) {
+    var session = result.data && result.data.session;
+    if (session && session.user) {
+      showAdmin(session.user.email);
     }
+  });
+
+  // ── Login ─────────────────────────────────────────────────
+  window.doLogin = async function() {
+    var email = document.getElementById('admin-email').value.trim();
+    var pass  = document.getElementById('admin-pass').value;
+    var errEl = document.getElementById('login-error');
+
+    errEl.style.display = 'none';
+
+    if (!email || !pass) {
+      errEl.textContent    = 'Please enter your email and password.';
+      errEl.style.display  = 'block';
+      return;
+    }
+
+    // Show spinner
+    document.getElementById('btn-login').disabled          = true;
+    document.getElementById('login-spinner').style.display = 'inline-block';
+    document.getElementById('login-label').textContent     = 'Verifying…';
+
+    var result = await supabase.auth.signInWithPassword({ email: email, password: pass });
+
+    // Hide spinner
+    document.getElementById('btn-login').disabled          = false;
+    document.getElementById('login-spinner').style.display = 'none';
+    document.getElementById('login-label').textContent     = '🔐 Login';
+
+    if (result.error) {
+      errEl.textContent   = '❌ ' + result.error.message;
+      errEl.style.display = 'block';
+      document.getElementById('admin-pass').value = '';
+      return;
+    }
+
+    showAdmin(result.data.user.email);
   };
 
-  window.doLogout = function() {
-    sessionStorage.removeItem('dac_admin_auth');
+  // ── Logout ────────────────────────────────────────────────
+  window.doLogout = async function() {
+    await supabase.auth.signOut();
     document.getElementById('admin-screen').style.display = 'none';
     document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('admin-pass').value = '';
+    document.getElementById('admin-email').value = '';
+    document.getElementById('admin-pass').value  = '';
   };
 
-  // Auto-login if session still valid
-  (async function() {
-    var stored = sessionStorage.getItem('dac_admin_auth');
-    if (!stored) return;
-    var correct = await sha256('HiYmtYvxpx123!');
-    if (stored === correct) {
-      CORRECT_HASH = correct;
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('admin-screen').style.display = 'block';
-      loadStats();
-      loadOrders();
-    }
-  })();
+  // ── Show admin panel ──────────────────────────────────────
+  function showAdmin(email) {
+    document.getElementById('login-screen').style.display    = 'none';
+    document.getElementById('admin-screen').style.display    = 'block';
+    document.getElementById('admin-email-display').textContent = email || '';
+    loadStats();
+    loadOrders();
+  }
 
-  // ── Supabase helpers ──────────────────────────────────────
-  function sbFetch(path, opts) {
+  // ── Authenticated Supabase fetch ──────────────────────────
+  async function sbFetch(path, opts) {
+    var sessionResult = await supabase.auth.getSession();
+    var token = sessionResult.data &&
+                sessionResult.data.session &&
+                sessionResult.data.session.access_token;
+
     var defaults = {
       headers: {
         'apikey':        SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Authorization': 'Bearer ' + (token || SUPABASE_KEY),
         'Content-Type':  'application/json'
       }
     };
@@ -340,8 +375,8 @@
           ? '<span class="badge badge-used">Used</span>'
           : '<span class="badge badge-unused">Ready</span>';
         if (isAdmin) statusBadge += ' <span class="badge badge-admin">Admin</span>';
-        var created = row.created_at ? new Date(row.created_at).toLocaleString() : '—';
-        var usedAt  = row.used_at    ? new Date(row.used_at).toLocaleString()    : '—';
+        var created  = row.created_at ? new Date(row.created_at).toLocaleString() : '—';
+        var usedAt   = row.used_at    ? new Date(row.used_at).toLocaleString()    : '—';
         var shortTok = row.token ? row.token.slice(0,12) + '…' : '—';
         return '<tr>' +
           '<td style="color:var(--saffron);font-weight:600;">' + (row.dac_code || '—') + '</td>' +
@@ -367,7 +402,7 @@
     var msgEl     = document.getElementById('unlock-msg');
 
     if (!code || code.length < 6) {
-      msgEl.className = 'unlock-msg error';
+      msgEl.className   = 'unlock-msg error';
       msgEl.textContent = '⚠ Please enter a valid DAC code.';
       return;
     }
