@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DAC Sticker</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <script>var _l=document.createElement("link");_l.rel="stylesheet";_l.href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500&display=swap";document.head.appendChild(_l);</script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -133,7 +133,7 @@
     <div class="sticker-coords" id="stk-coords"></div>
     <div class="sticker-scan">📱 Scan for directions</div>
     <div class="sticker-web">🌐 dacgrenada.github.io/Dac</div>
-    <div class="sticker-email">✉ dac.grenada@gmail.com</div>
+    <div class="sticker-email">✉ <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d4b0b5b7fab3a6b1bab5b0b594b3b9b5bdb8fab7bbb9">[email&#160;protected]</a></div>
     <div class="sticker-date" id="stk-date"></div>
   </div>
 
@@ -162,7 +162,7 @@
 
 </div><!-- #sticker-root -->
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 (function () {
   'use strict';
 
@@ -189,6 +189,8 @@
 
   // Show sticker root
   document.getElementById('sticker-root').style.display = 'contents';
+  var _em = document.getElementById('stk-email');
+  if (_em) _em.textContent = '✉ dac.grenada' + String.fromCharCode(64) + 'gmail.com';
 
   // 3. Populate sticker from localStorage (if available)
   if (d) {
@@ -304,19 +306,70 @@
   }
 
   function unlockSticker() {
-    var wm = document.getElementById('sticker-wm');    if (wm) wm.remove();
-    var pb = document.getElementById('print-block');   if (pb) pb.remove();
-
-    var s = document.createElement('style');
-    s.textContent = '@media print{#pay-bar{display:none!important}#sticker-unlocked{display:none!important}#verifying-bar{display:none!important}body{background:#fff!important}}';
-    document.head.appendChild(s);
-
     document.getElementById('verifying-bar').style.display    = 'none';
     document.getElementById('pay-bar').style.display          = 'none';
     document.getElementById('sticker-unlocked').style.display = 'block';
+    var btn = document.querySelector('.btn-print-now');
+    if (btn) btn.textContent = 'Download Sticker Image';
   }
 
-  window.consumePrint = function () { window.print(); };
+  window.consumePrint = function () {
+    var code   = document.getElementById('stk-code').textContent;
+    var coords = document.getElementById('stk-coords').textContent;
+    var date   = document.getElementById('stk-date').textContent;
+    var scale = 3, W = 320, H = 490;
+    var canvas = document.createElement('canvas');
+    canvas.width = W * scale; canvas.height = H * scale;
+    var ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.roundRect(0,0,W,H,14); ctx.fill();
+    ctx.strokeStyle = '#f0a500'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.roundRect(1.5,1.5,W-3,H-3,13); ctx.stroke();
+    ctx.font = '44px serif'; ctx.textAlign = 'center';
+    ctx.fillText('\u{1F1EC}\u{1F1E9}', W/2, 58);
+    ctx.fillStyle = '#0c1220'; ctx.font = 'bold 32px Arial';
+    ctx.fillText('DAC', W/2, 98);
+    ctx.fillStyle = '#7a92b4'; ctx.font = '10px monospace';
+    ctx.fillText('DIGITAL ADDRESS CODES', W/2, 116);
+    ctx.fillStyle = '#c87700'; ctx.font = 'bold 22px monospace';
+    ctx.fillText(code, W/2, 148);
+
+    function finish() {
+      ctx.fillStyle = '#555'; ctx.font = '10px monospace';
+      ctx.fillText(coords, W/2, 345);
+      ctx.fillStyle = '#888';
+      ctx.fillText('SCAN FOR DIRECTIONS', W/2, 362);
+      ctx.fillStyle = '#c87700';
+      ctx.fillText('dacgrenada.github.io/Dac', W/2, 382);
+      ctx.fillStyle = '#7a92b4'; ctx.font = '9px monospace';
+      ctx.fillText('dac.grenada' + String.fromCharCode(64) + 'gmail.com', W/2, 398);
+      ctx.strokeStyle = '#eee'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(20,412); ctx.lineTo(W-20,412); ctx.stroke();
+      ctx.fillStyle = '#aaa'; ctx.font = '9px monospace';
+      ctx.fillText(date, W/2, 428);
+      var link = document.createElement('a');
+      link.download = 'DAC-Sticker-' + code + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    var qrEl = document.querySelector('#sticker-root img.sticker-qr');
+    if (qrEl && qrEl.src) {
+      var img = new Image(); img.crossOrigin = 'anonymous';
+      img.onload = function() { ctx.drawImage(img,80,160,160,160); finish(); };
+      img.onerror = finish; img.src = qrEl.src;
+    } else {
+      try {
+        var stored = JSON.parse(localStorage.getItem('dac_sticker_data')||'{}');
+        if (stored.qrUrl) {
+          var img2 = new Image(); img2.crossOrigin = 'anonymous';
+          img2.onload = function() { ctx.drawImage(img2,80,160,160,160); finish(); };
+          img2.onerror = finish; img2.src = stored.qrUrl;
+        } else { finish(); }
+      } catch(e) { finish(); }
+    }
+  };
 
 })();
 </script>
