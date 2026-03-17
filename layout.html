@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DAC Property Layout</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <script>var _l=document.createElement("link");_l.rel="stylesheet";_l.href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500&display=swap";document.head.appendChild(_l);</script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -308,7 +308,7 @@
 
     <div class="layout-footer">
       <span>dacgrenada.github.io/Dac</span>
-      <span>dac.grenada@gmail.com</span>
+      <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b4d0d5d79ad3c6d1dad5d0d5f4d3d9d5ddd89ad7dbd9">[email&#160;protected]</a></span>
       <span id="inf-footer">—</span>
     </div>
   </div>
@@ -348,7 +348,7 @@
 
 </div><!-- #layout-root -->
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 (function() {
   'use strict';
 
@@ -534,22 +534,143 @@
   };
 
   function unlockLayout() {
-    // Remove watermark
-    var wm = document.getElementById('wm-overlay');
-    if (wm) wm.remove();
-
-    // Remove print blocker
-    var bs = document.getElementById('print-block-style');
-    if (bs) bs.remove();
-
-    injectPaidPrintCSS();
-
-    // Update UI
     document.getElementById('waiting-bar').style.display = 'none';
     document.getElementById('paid-banner').style.display = 'block';
+    // Change print button to download
+    var btn = document.querySelector('.print-btn');
+    if (btn) btn.textContent = 'Download Layout Image';
   }
 
-  window.consumePrint = function() { window.print(); };
+  window.consumePrint = function() {
+    var code    = document.getElementById('hdr-code') ? document.getElementById('hdr-code').textContent : '';
+    var satImg  = document.querySelector('.sat-img');
+    var svImg   = document.querySelector('.sv-img');
+    var qrImg   = document.querySelector('.qr-panel img');
+    var region  = document.getElementById('inf-region') ? document.getElementById('inf-region').textContent : '';
+    var lat     = document.getElementById('inf-lat') ? document.getElementById('inf-lat').textContent : '';
+    var lng     = document.getElementById('inf-lng') ? document.getElementById('inf-lng').textContent : '';
+    var date    = document.getElementById('inf-date') ? document.getElementById('inf-date').textContent : '';
+
+    // A4 proportions at 96dpi scale
+    var scale = 2, W = 794, H = 1123;
+    var canvas = document.createElement('canvas');
+    canvas.width = W * scale; canvas.height = H * scale;
+    var ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+
+    // White background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+
+    // Header bar
+    ctx.fillStyle = '#0c1220';
+    ctx.fillRect(0, 0, W, 60);
+    ctx.strokeStyle = '#f0a500'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0,60); ctx.lineTo(W,60); ctx.stroke();
+
+    // Logo
+    ctx.fillStyle = '#f0a500';
+    ctx.font = 'bold 28px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('DAC', 24, 38);
+    ctx.fillStyle = '#7a92b4';
+    ctx.font = '9px monospace';
+    ctx.fillText('DIGITAL ADDRESS CODES', 24, 52);
+
+    // Code top right
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 20px monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(code, W - 24, 38);
+    ctx.fillStyle = '#7a92b4';
+    ctx.font = '9px monospace';
+    ctx.fillText('DAC CODE', W - 24, 52);
+
+    // Info section at bottom
+    function drawInfo() {
+      var infoY = 780;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, infoY, W - 130, H - infoY - 30);
+
+      ctx.textAlign = 'left';
+      var fields = [
+        ['DAC CODE', code],
+        ['REGION', region],
+        ['LATITUDE', lat],
+        ['LONGITUDE', lng],
+        ['GENERATED', date]
+      ];
+      var col1X = 24, col2X = W/2 - 65;
+      fields.forEach(function(f, i) {
+        var x = i % 2 === 0 ? col1X : col2X;
+        var y = infoY + 20 + Math.floor(i/2) * 50;
+        ctx.fillStyle = '#7a92b4'; ctx.font = '9px monospace';
+        ctx.fillText(f[0], x, y);
+        ctx.fillStyle = i === 0 ? '#f0a500' : '#111111';
+        ctx.font = i === 0 ? 'bold 15px monospace' : '13px monospace';
+        ctx.fillText(f[1], x, y + 16);
+      });
+
+      // Footer
+      ctx.fillStyle = '#f8f8f8';
+      ctx.fillRect(0, H - 30, W, 30);
+      ctx.strokeStyle = '#dddddd'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, H-30); ctx.lineTo(W, H-30); ctx.stroke();
+      ctx.fillStyle = '#555555'; ctx.font = '9px monospace'; ctx.textAlign = 'left';
+      ctx.fillText(code + ' · ' + lat + ', ' + lng, 24, H - 10);
+      ctx.textAlign = 'right';
+      ctx.fillText('dacgrenada.github.io/Dac', W - 24, H - 10);
+
+      // Download
+      var link = document.createElement('a');
+      link.download = 'DAC-Layout-' + code + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    // Load images sequentially
+    var satLoaded = false, svLoaded = false, qrLoaded = false;
+    var satH = 320, svH = 200, qrSize = 100;
+
+    function tryFinish() {
+      if (!satLoaded) return;
+      drawInfo();
+    }
+
+    // Load satellite image
+    if (satImg && satImg.src) {
+      var s1 = new Image(); s1.crossOrigin = 'anonymous';
+      s1.onload = function() {
+        ctx.drawImage(s1, 0, 60, W, satH);
+        satLoaded = true;
+
+        // Load street view
+        if (svImg && svImg.src) {
+          var s2 = new Image(); s2.crossOrigin = 'anonymous';
+          s2.onload = function() {
+            ctx.drawImage(s2, 0, 60 + satH, W - 130, svH);
+            // Load QR
+            if (qrImg && qrImg.src) {
+              var s3 = new Image(); s3.crossOrigin = 'anonymous';
+              s3.onload = function() {
+                ctx.drawImage(s3, W - 120, 60 + satH, qrSize, qrSize);
+                tryFinish();
+              };
+              s3.onerror = tryFinish;
+              s3.src = qrImg.src;
+            } else { tryFinish(); }
+          };
+          s2.onerror = function() { satLoaded = true; tryFinish(); };
+          s2.src = svImg.src;
+        } else { tryFinish(); }
+      };
+      s1.onerror = function() { satLoaded = true; tryFinish(); };
+      s1.src = satImg.src;
+    } else {
+      satLoaded = true;
+      tryFinish();
+    }
+  };
 
   function injectPaidPrintCSS() {
     var s = document.createElement('style');
@@ -575,8 +696,10 @@
       '  .field-value.highlight { color: #c87700 !important; font-size: 13px !important; }',
       '  .field-value.seafoam { color: #1a8a6e !important; }',
       '  .qr-panel img { width: 85px !important; height: 85px !important; }',
-      '  .layout-footer { background: #f8f8f8 !important; border-color: #ddd !important; padding: 6px 16px !important; }',
-      '  .layout-footer span { color: #555 !important; font-size: 8px !important; }',
+      '  .layout-footer { background: #f8f8f8 !important; border-color: #ddd !important; }',
+      '  .layout-footer span { color: #555 !important; }',
+      '  #paid-banner { display: none !important; }',
+      '  .print-btn { display: none !important; }',
       '}'
     ].join('\n');
     document.head.appendChild(s);
