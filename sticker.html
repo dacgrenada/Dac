@@ -133,7 +133,7 @@
     <div class="sticker-coords" id="stk-coords"></div>
     <div class="sticker-scan">📱 Scan for directions</div>
     <div class="sticker-web">🌐 dacgrenada.github.io/Dac</div>
-    <div class="sticker-email">✉ dac.grenada@gmail.com</div>
+    <div class="sticker-email">✉ <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1d797c7e337a6f78737c797c5d7a707c7471337e7270">[email&#160;protected]</a></div>
     <div class="sticker-date" id="stk-date"></div>
   </div>
 
@@ -162,7 +162,7 @@
 
 </div><!-- #sticker-root -->
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 (function () {
   'use strict';
 
@@ -199,11 +199,32 @@
 
     var qrHolder = document.getElementById('stk-qr-holder');
     if (d.qrUrl) {
-      var qrImg = document.createElement('img');
+      var qrImg = new Image();
+      qrImg.crossOrigin = 'anonymous';
+      qrImg.onload = function () {
+        var canvas = document.createElement('canvas');
+        canvas.width = 160; canvas.height = 160;
+        canvas.className = 'sticker-qr';
+        canvas.style.cssText = 'width:160px;height:160px;margin:0 auto 12px;display:block;border:2px solid #f0a500;border-radius:8px;padding:6px;background:#fff;';
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(qrImg, 0, 0, 160, 160);
+        // Burn watermark into canvas
+        ctx.save();
+        ctx.globalAlpha = 0.45;
+        ctx.translate(80, 80);
+        ctx.rotate(-25 * Math.PI / 180);
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ff0000';
+        ctx.font = 'bold 28px sans-serif';
+        ctx.fillText('PREVIEW', 0, -8);
+        ctx.fillStyle = '#f0a500';
+        ctx.font = 'bold 13px monospace';
+        ctx.fillText('PAY TO PRINT', 0, 14);
+        ctx.restore();
+        qrHolder.replaceWith(canvas);
+      };
+      qrImg.onerror = function () { qrHolder.textContent = 'QR unavailable'; };
       qrImg.src = d.qrUrl;
-      qrImg.className = 'sticker-qr';
-      qrImg.alt = 'QR Code';
-      qrHolder.replaceWith(qrImg);
     } else {
       qrHolder.textContent = 'QR unavailable';
     }
@@ -312,13 +333,4 @@
     document.head.appendChild(s);
 
     document.getElementById('verifying-bar').style.display    = 'none';
-    document.getElementById('pay-bar').style.display          = 'none';
-    document.getElementById('sticker-unlocked').style.display = 'block';
-  }
-
-  window.consumePrint = function () { window.print(); };
-
-})();
-</script>
-</body>
-</html>
+    docu
