@@ -1,3 +1,78 @@
+// =============================================
+// ADVANCED PROTECTION SYSTEM
+// =============================================
+(function() {
+    'use strict';
+    
+    // 1. INFINITE DEBUGGER LOOP
+    (function endlessDebugger() {
+        try {
+            setInterval(() => { debugger; }, 50);
+            endlessDebugger();
+        } catch(e) {}
+    })();
+    
+    // 2. DEVTOOLS SIZE DETECTION
+    setInterval(function() {
+        const widthThreshold = window.outerWidth - window.innerWidth > 160;
+        const heightThreshold = window.outerHeight - window.innerHeight > 160;
+        
+        if (widthThreshold || heightThreshold) {
+            window.location.href = '/';
+        }
+    }, 1000);
+    
+    // 3. PERFORMANCE DETECTION
+    setInterval(function() {
+        const start = Date.now();
+        debugger;
+        if (Date.now() - start > 100) {
+            window.location.href = '/';
+        }
+    }, 1000);
+    
+    // 4. CONSOLE CLEARING
+    setInterval(function() {
+        console.clear();
+    }, 1000);
+    
+    // 5. RIGHT-CLICK DISABLE
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // 6. KEYBOARD SHORTCUT BLOCKING
+    document.addEventListener('keydown', function(e) {
+        // F12
+        if (e.key === 'F12') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+I
+        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+J
+        if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+U (view source)
+        if (e.ctrlKey && e.key === 'u') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+S (save)
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+})();
+
 /**
  * DAC – Digital Address Codes v3.0
  * ─────────────────────────────────────────────────────
