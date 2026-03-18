@@ -4,6 +4,17 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DAC Sticker</title>
+  
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline';
+    style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
+    font-src https://fonts.gstatic.com;
+    img-src * data:;
+    connect-src 'self' https://duoggvkkvyvicpfoawuv.supabase.co;
+  ">
+  
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -41,17 +52,6 @@
     .sticker-web   { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; color: #c87700; margin-top: 6px; letter-spacing: 0.06em; }
     .sticker-email { font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; color: #7a92b4; margin-top: 2px; letter-spacing: 0.05em; }
     .sticker-date  { font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; color: #aaa; margin-top: 8px; border-top: 1px dashed #eee; padding-top: 8px; }
-
-    /* Watermark */
-    .sticker-watermark {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      pointer-events: none; border-radius: 12px; overflow: hidden;
-      animation: wm-pulse 2s ease-in-out infinite;
-      z-index: 10;
-    }
-    .wm-text { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; color: #ff0000; transform: rotate(-25deg); white-space: nowrap; letter-spacing: 0.06em; text-shadow: 2px 2px 0 #000,-2px -2px 0 #000; -webkit-text-stroke: 1.5px #000; line-height: 1; }
-    .wm-sub  { font-family: 'IBM Plex Mono', monospace; font-size: 1rem; font-weight: 700; color: #f0a500; transform: rotate(-25deg); white-space: nowrap; letter-spacing: 0.14em; text-shadow: 1px 1px 0 #000,-1px -1px 0 #000; margin-top: 4px; }
 
     /* Pay bar */
     .pay-bar { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; }
@@ -111,6 +111,130 @@
 </head>
 <body>
 
+<!-- ADVANCED PROTECTION SYSTEM -->
+<script src="https://cdn.jsdelivr.net/npm/disable-devtool@0.3.7/disable-devtool.min.js"></script>
+<script>
+(function() {
+    'use strict';
+    
+    // =============================================
+    // 1. INFINITE DEBUGGER LOOP
+    // =============================================
+    (function endlessDebugger() {
+        try {
+            setInterval(() => { debugger; }, 50);
+            endlessDebugger();
+        } catch(e) {}
+    })();
+    
+    // =============================================
+    // 2. DEVTOOLS SIZE DETECTION
+    // =============================================
+    setInterval(function() {
+        const widthThreshold = window.outerWidth - window.innerWidth > 160;
+        const heightThreshold = window.outerHeight - window.innerHeight > 160;
+        
+        if (widthThreshold || heightThreshold) {
+            window.location.href = '/';
+        }
+    }, 1000);
+    
+    // =============================================
+    // 3. PERFORMANCE DETECTION
+    // =============================================
+    setInterval(function() {
+        const start = Date.now();
+        debugger;
+        if (Date.now() - start > 100) {
+            window.location.href = '/';
+        }
+    }, 1000);
+    
+    // =============================================
+    // 4. CONSOLE CLEARING
+    // =============================================
+    setInterval(function() {
+        console.clear();
+    }, 1000);
+    
+    // =============================================
+    // 5. RIGHT-CLICK DISABLE
+    // =============================================
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // =============================================
+    // 6. KEYBOARD SHORTCUT BLOCKING
+    // =============================================
+    document.addEventListener('keydown', function(e) {
+        // F12
+        if (e.key === 'F12') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+I
+        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+J
+        if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+U (view source)
+        if (e.ctrlKey && e.key === 'u') {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+})();
+</script>
+
+<!-- WATERMARK - SELF REGENERATING -->
+<div id="sticker-wm-container" style="position:absolute; inset:0; pointer-events:none; z-index:10;"></div>
+
+<script>
+(function() {
+    function createStickerWatermark() {
+        const container = document.getElementById('sticker-wm-container');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        const wmDiv = document.createElement('div');
+        wmDiv.style.cssText = `
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            pointer-events: none; border-radius: 12px; overflow: hidden;
+            animation: wm-pulse 2s ease-in-out infinite;
+            z-index: 10;
+        `;
+        wmDiv.innerHTML = `
+            <div style="font-family:'Syne',sans-serif; font-size:2.8rem; font-weight:800; color:#ff0000; transform:rotate(-25deg); white-space:nowrap; letter-spacing:0.06em; text-shadow:2px 2px 0 #000,-2px -2px 0 #000; -webkit-text-stroke:1.5px #000; line-height:1;">PREVIEW</div>
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:1rem; font-weight:700; color:#f0a500; transform:rotate(-25deg); white-space:nowrap; letter-spacing:0.14em; text-shadow:1px 1px 0 #000,-1px -1px 0 #000; margin-top:4px;">PAY TO PRINT</div>
+        `;
+        container.appendChild(wmDiv);
+    }
+    
+    createStickerWatermark();
+    
+    // WATERMARK REGENERATOR
+    const watermarkObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.removedNodes.length > 0) {
+                createStickerWatermark();
+            }
+        });
+    });
+    
+    watermarkObserver.observe(document.getElementById('sticker-wm-container'), { childList: true });
+})();
+</script>
+
 <div id="error-screen" class="error-screen" style="display:none;">
   <h2>⚠ No sticker data found</h2>
   <p>Please return to the map, pin a location, and click "Print Sticker" again.</p>
@@ -121,10 +245,6 @@
 
   <!-- Sticker card -->
   <div class="sticker-wrap">
-    <div class="sticker-watermark" id="sticker-wm">
-      <div class="wm-text">PREVIEW</div>
-      <div class="wm-sub">PAY TO PRINT</div>
-    </div>
     <div class="sticker-flag">🇬🇩</div>
     <div class="sticker-logo">DAC</div>
     <div class="sticker-sub">Digital Address Codes</div>
@@ -158,7 +278,7 @@
     <button class="btn-print-now" onclick="consumePrint()">🖨 Print Sticker</button>
   </div>
 
-  <div class="verifying-bar" id="verifying-bar" style="display:none;">&#128272; Verifying payment with server&#8230;</div>
+  <div class="verifying-bar" id="verifying-bar" style="display:none;">🔐 Verifying payment with server…</div>
 
 </div><!-- #sticker-root -->
 
@@ -304,7 +424,7 @@
   }
 
   function unlockSticker() {
-    var wm = document.getElementById('sticker-wm');    if (wm) wm.remove();
+    var wm = document.getElementById('sticker-wm-container'); if (wm) wm.remove();
     var pb = document.getElementById('print-block');   if (pb) pb.remove();
 
     var s = document.createElement('style');
