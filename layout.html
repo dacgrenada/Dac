@@ -196,6 +196,43 @@
     .error-screen h2 { font-family: 'Syne', sans-serif; font-size: 1.4rem; }
     .error-screen p  { font-size: 0.82rem; color: #7a92b4; max-width: 400px; }
   </style>
+  
+  <!-- ============================================= -->
+  <!-- ULTIMATE PRINT BLOCKER - THIS PREVENTS PRINTING -->
+  <!-- ============================================= -->
+  <style id="print-blocker">
+    @media print {
+      html, body {
+        display: none !important;
+        visibility: hidden !important;
+      }
+      
+      * {
+        display: none !important;
+        visibility: hidden !important;
+      }
+      
+      /* Show only a message when trying to print */
+      html::after {
+        content: "❌ PRINTING BLOCKED - Complete payment to unlock ❌";
+        display: block !important;
+        visibility: visible !important;
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        font-size: 24px !important;
+        color: red !important;
+        background: black !important;
+        padding: 20px !important;
+        border: 3px solid red !important;
+        z-index: 9999999 !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        width: 80% !important;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -261,16 +298,6 @@
                 pointer-events: none;
                 transform: rotate(-2deg);
             }
-            
-            @media print {
-                body::before, body::after {
-                    display: block !important;
-                    opacity: 1 !important;
-                    color: red !important;
-                    background: rgba(255,0,0,0.2) !important;
-                    font-size: 20px !important;
-                }
-            }
         `;
         document.head.appendChild(style);
     }
@@ -306,13 +333,57 @@
     }
     
     // =============================================
-    // 4. PRINT BLOCKER
+    // 4. ULTIMATE PRINT BLOCKER - MULTIPLE LAYERS
     // =============================================
-    const originalPrint = window.print;
+    
+    // Layer 1: Override window.print completely
     window.print = function() {
-        alert('This document is watermarked and cannot be printed until payment is completed.');
+        alert('❌ PRINTING BLOCKED - You must complete payment to unlock printing.');
         return false;
     };
+    
+    // Layer 2: Block keyboard shortcuts for printing (Ctrl+P, Cmd+P)
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+            e.stopPropagation();
+            alert('❌ Printing is disabled until payment is completed.');
+            return false;
+        }
+    }, true);
+    
+    // Layer 3: Block context menu print
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    }, true);
+    
+    // Layer 4: Remove print styles that might exist
+    const removePrintStyles = document.createElement('style');
+    removePrintStyles.textContent = `
+        @media print {
+            * {
+                display: none !important;
+            }
+            body {
+                display: none !important;
+            }
+        }
+    `;
+    document.head.appendChild(removePrintStyles);
+    
+    // Layer 5: Monitor for print attempts
+    let printAttempts = 0;
+    const printInterval = setInterval(function() {
+        // Check if print dialog opened (browser specific)
+        if (window.matchMedia('print').matches) {
+            printAttempts++;
+            if (printAttempts > 3) {
+                window.location.reload();
+            }
+        }
+    }, 100);
     
     // Initialize all protections
     addCanvasWatermark();
@@ -448,7 +519,7 @@
 
 </div><!-- #layout-root -->
 
-<!-- PAYMENT FLOW SCRIPT (keep your existing script) -->
+<!-- PAYMENT FLOW SCRIPT -->
 <script>
 (function() {
   'use strict';
@@ -456,27 +527,27 @@
   var SUPABASE_URL = 'https://duoggvkkvyvicpfoawuv.supabase.co';
   var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
 
-  // ── 1. Check URL for token (admin / success.html flow) ────────────────────
+  // ── 1. Check URL for token ────────────────────
   var urlParams = new URLSearchParams(window.location.search);
   var urlToken  = (urlParams.get('token') || '').trim();
 
-  // ── 2. Load localStorage data ─────────────────────────────────────────────
+  // ── 2. Load localStorage data ─────────────────
   var d = null;
   try {
     var raw = localStorage.getItem('dac_layout_data');
     if (raw) d = JSON.parse(raw);
   } catch(e) {}
 
-  // ── 3. Nothing at all — show error ────────────────────────────────────────
+  // ── 3. Nothing at all — show error ────────────
   if (!d && !urlToken) {
     document.getElementById('error-screen').style.display = 'flex';
     return;
   }
 
-  // Always show layout root — never leave the page blank
+  // Always show layout root
   document.getElementById('layout-root').style.display = 'block';
 
-  // ── 4. Populate fields from localStorage (if available) ──────────────────
+  // ── 4. Populate fields from localStorage ──────
   if (d) {
     document.title = 'DAC Layout – ' + d.code;
     document.getElementById('hdr-code').textContent   = d.code;
@@ -507,19 +578,22 @@
     }
   }
 
-  // ── 5. Already paid via localStorage flag — skip payment UI ───────────────
+  // ── 5. Already paid via localStorage ───────────
   if (d && d.isPaid) {
     document.getElementById('pay-bar').style.display    = 'none';
-    var bs = document.getElementById('print-block-style');
-    if (bs) bs.remove();
-    injectPaidPrintCSS();
     
-    // Remove watermarks when paid
+    // Remove watermarks and print blocker
     document.querySelectorAll('[data-dac-ultra]').forEach(el => el.remove());
+    
+    // Remove print blocker style
+    const pb = document.getElementById('print-blocker');
+    if (pb) pb.remove();
+    
+    injectPaidPrintCSS();
     return;
   }
 
-  // ── 6. Token in URL — verify with Supabase (admin / success.html flow) ────
+  // ── 6. Token in URL — verify with Supabase ────
   if (urlToken) {
     document.getElementById('pay-bar').style.display = 'none';
 
@@ -582,26 +656,25 @@
       document.getElementById('pay-bar').style.display = 'flex';
     });
 
-    return; // stop — don't run normal payment flow
+    return;
   }
 
-  // ── 7. Normal payment flow ────────────────────────────────────────────────
+  // ── 7. Normal payment flow ────────────────────
   var STRIPE_LINK   = (d && d.stripeLink) || 'https://buy.stripe.com/8x26oB05y81Z4cL7cR5wI04';
   var EXPECTED_CODE = d ? d.code : '';
   var paymentStarted = false;
   var unlocked       = false;
 
-  // Check if already paid (e.g. page reload after payment)
+  // Check if already paid
   try {
     if (localStorage.getItem('dac_paid_' + EXPECTED_CODE) === '1') {
-      // Consume the key immediately — one load = one use
       try { localStorage.removeItem('dac_paid_' + EXPECTED_CODE); } catch(e) {}
       unlockLayout();
       return;
     }
   } catch(e) {}
 
-  // Open BroadcastChannel immediately — must be open BEFORE success.html posts
+  // BroadcastChannel
   var bc = null;
   try {
     bc = new BroadcastChannel('dac_payment');
@@ -617,7 +690,7 @@
     };
   } catch(e) {}
 
-  // localStorage storage-event fallback (same origin, different tab)
+  // storage-event fallback
   window.addEventListener('storage', function(e) {
     if (unlocked) return;
     if (e.key === 'dac_paid_' + EXPECTED_CODE && e.newValue === '1') {
@@ -640,7 +713,7 @@
     // Remove all watermarks
     document.querySelectorAll('[data-dac-ultra]').forEach(el => el.remove());
     
-    // Remove CSS watermarks by adding new style
+    // Remove CSS watermarks
     const removeStyle = document.createElement('style');
     removeStyle.textContent = `
         body::before, body::after {
@@ -648,6 +721,10 @@
         }
     `;
     document.head.appendChild(removeStyle);
+
+    // Remove print blocker
+    const pb = document.getElementById('print-blocker');
+    if (pb) pb.remove();
 
     injectPaidPrintCSS();
 
