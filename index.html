@@ -5,6 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DAC – Digital Address Codes</title>
   <link rel="stylesheet" href="style.css" />
+  
+  <!-- ULTIMATE PRINT BLOCKER FOR MAIN PAGE -->
+  <style id="main-print-blocker">
+    @media print {
+      html, body {
+        display: none !important;
+        visibility: hidden !important;
+      }
+      * {
+        display: none !important;
+        visibility: hidden !important;
+      }
+      html::after {
+        content: "❌ PRINTING BLOCKED - Use 'Print Sticker' or 'Generate Property Layout' buttons after payment ❌";
+        display: block !important;
+        visibility: visible !important;
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        font-size: 18px !important;
+        color: red !important;
+        background: black !important;
+        padding: 30px !important;
+        border: 3px solid red !important;
+        z-index: 9999999 !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        width: 80% !important;
+        white-space: normal !important;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -59,10 +92,42 @@
                 window.location.href = '/';
             }
         }, 100);
+        
+        // =============================================
+        // 2. BLOCK PRINTING ON MAIN PAGE
+        // =============================================
+        
+        // Block Ctrl+P / Cmd+P
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+                e.stopPropagation();
+                alert('❌ Printing is only available through "Print Sticker" after payment.');
+                return false;
+            }
+        }, true);
+        
+        // Override window.print
+        window.print = function() {
+            alert('❌ Please use "Print Sticker" button after payment to print.');
+            return false;
+        };
+        
+        // Block browser print menu (additional protection)
+        let printAttempts = 0;
+        const printInterval = setInterval(function() {
+            if (window.matchMedia && window.matchMedia('print').matches) {
+                printAttempts++;
+                if (printAttempts > 2) {
+                    window.location.reload();
+                }
+            }
+        }, 100);
+        
     })();
     
     // =============================================
-    // 2. CANVAS WATERMARK (CAN'T BE REMOVED)
+    // 3. CANVAS WATERMARK (CAN'T BE REMOVED)
     // =============================================
     function addCanvasWatermark() {
         const canvas = document.createElement('canvas');
@@ -82,7 +147,7 @@
     }
     
     // =============================================
-    // 3. BACKGROUND CSS WATERMARK
+    // 4. BACKGROUND CSS WATERMARK
     // =============================================
     function addCSSWatermark() {
         const style = document.createElement('style');
