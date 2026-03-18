@@ -1,85 +1,40 @@
 // =============================================
-// ADVANCED PROTECTION SYSTEM
+// ULTIMATE PROTECTION
 // =============================================
 (function() {
     'use strict';
     
-    // 1. INFINITE DEBUGGER LOOP
-    (function endlessDebugger() {
-        try {
-            setInterval(() => { debugger; }, 50);
-            endlessDebugger();
-        } catch(e) {}
-    })();
+    // Override console
+    const noop = function() {};
+    console.log = noop;
+    console.info = noop;
+    console.warn = noop;
+    console.error = noop;
+    console.debug = noop;
     
-    // 2. DEVTOOLS SIZE DETECTION
-    setInterval(function() {
-        const widthThreshold = window.outerWidth - window.innerWidth > 160;
-        const heightThreshold = window.outerHeight - window.innerHeight > 160;
-        
-        if (widthThreshold || heightThreshold) {
-            window.location.href = '/';
-        }
-    }, 1000);
-    
-    // 3. PERFORMANCE DETECTION
-    setInterval(function() {
-        const start = Date.now();
-        debugger;
-        if (Date.now() - start > 100) {
-            window.location.href = '/';
-        }
-    }, 1000);
-    
-    // 4. CONSOLE CLEARING
-    setInterval(function() {
-        console.clear();
-    }, 1000);
-    
-    // 5. RIGHT-CLICK DISABLE
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-        return false;
-    });
-    
-    // 6. KEYBOARD SHORTCUT BLOCKING
+    // Block shortcuts
     document.addEventListener('keydown', function(e) {
-        // F12
-        if (e.key === 'F12') {
+        if (e.key === 'F12' || 
+            (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+            (e.ctrlKey && e.key === 'u')) {
             e.preventDefault();
             return false;
         }
-        // Ctrl+Shift+I
-        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
-            e.preventDefault();
-            return false;
-        }
-        // Ctrl+Shift+J
-        if (e.ctrlKey && e.shiftKey && e.key === 'J') {
-            e.preventDefault();
-            return false;
-        }
-        // Ctrl+U (view source)
-        if (e.ctrlKey && e.key === 'u') {
-            e.preventDefault();
-            return false;
-        }
-        // Ctrl+S (save)
-        if (e.ctrlKey && e.key === 's') {
-            e.preventDefault();
-            return false;
-        }
-    });
+    }, true);
     
+    // DevTools size detection
+    setInterval(function() {
+        if (window.outerWidth - window.innerWidth > 200 || 
+            window.outerHeight - window.innerHeight > 200) {
+            window.location.href = '/';
+        }
+    }, 100);
 })();
 
 /**
  * DAC – Digital Address Codes v3.0
  * ─────────────────────────────────────────────────────
  * Format: CC-PPP-XXXXXX
- *   CC      = ISO 3166-1 alpha-2 country code  (GD, US, GB, CA …)
- *   PPP     = 3-letter parish / city / region code
- *   XXXXXX  = 6-char unique property hash (2+ billion combos)
  */
 
 'use strict';
@@ -730,27 +685,32 @@ function updateStreetView(lat, lng) {
 }
 
 // ============================================================
-// SECTION 10 — QR CODE GENERATION
+// SECTION 10 — QR CODE GENERATION (CANVAS BASED - CAN'T BE MODIFIED)
 // ============================================================
 
 function generateQRCode(url) {
-  const wrapper     = document.getElementById('qr-wrapper');
+  const wrapper = document.getElementById('qr-wrapper');
   const placeholder = wrapper.querySelector('.qr-placeholder');
-  const canvas      = document.getElementById('qr-canvas');
-
+  
   if (placeholder) placeholder.style.display = 'none';
-  canvas.style.display = 'none';
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  const existingQR = wrapper.querySelector('.qr-generated');
+  
+  // Remove any existing QR elements
+  const existingQR = wrapper.querySelector('.qr-generated, canvas');
   if (existingQR) existingQR.remove();
-
+  
+  // Create canvas for QR code
+  const canvas = document.createElement('canvas');
+  canvas.width = 200;
+  canvas.height = 200;
+  canvas.style.cssText = 'border-radius:6px; border:3px solid #f0a500; padding:8px; background:white; max-width:100%; display:block; margin:0 auto;';
+  canvas.className = 'qr-generated';
+  canvas.id = 'qr-canvas';
+  
+  // Use QRCode library to generate on temp div then draw to canvas
   const tempDiv = document.createElement('div');
-  tempDiv.className = 'qr-generated';
   tempDiv.style.cssText = 'position:absolute;left:-9999px;top:-9999px;';
   document.body.appendChild(tempDiv);
-
+  
   new QRCode(tempDiv, {
     text: url,
     width: 200,
@@ -759,27 +719,13 @@ function generateQRCode(url) {
     colorLight: '#ffffff',
     correctLevel: QRCode.CorrectLevel.M
   });
-
+  
   setTimeout(() => {
     const sourceCanvas = tempDiv.querySelector('canvas');
     if (sourceCanvas) {
-      canvas.width  = sourceCanvas.width;
-      canvas.height = sourceCanvas.height;
-      ctx.drawImage(sourceCanvas, 0, 0);
-      canvas.style.display = 'block';
-    } else {
-      const sourceImg = tempDiv.querySelector('img');
-      if (sourceImg) {
-        canvas.style.display = 'none';
-        const displayImg     = document.createElement('img');
-        displayImg.src       = sourceImg.src;
-        displayImg.id        = 'qr-img';
-        displayImg.style.cssText = 'border-radius:6px;border:3px solid #f0a500;padding:8px;background:white;max-width:100%;';
-        displayImg.className = 'qr-generated';
-        const oldImg = wrapper.querySelector('#qr-img');
-        if (oldImg) oldImg.remove();
-        wrapper.appendChild(displayImg);
-      }
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(sourceCanvas, 0, 0, 200, 200);
+      wrapper.appendChild(canvas);
     }
     tempDiv.remove();
   }, 100);
@@ -896,20 +842,17 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('click', (e) => {
   if (e.target.id !== 'btn-download') return;
   const canvas = document.getElementById('qr-canvas');
-  const img    = document.getElementById('qr-img');
-  let url = null;
-  if (canvas && canvas.style.display !== 'none') url = canvas.toDataURL('image/png');
-  else if (img) url = img.src;
-  if (!url) return;
+  if (!canvas) return;
+  
   const link = document.createElement('a');
-  link.href = url;
+  link.href = canvas.toDataURL('image/png');
   link.download = (currentCode || 'dac') + '-qr.png';
   link.click();
   showToast('QR downloaded');
 });
 
 // ============================================================
-// SECTION 15 — PRINT STICKER (payment-gated, same pattern as layout)
+// SECTION 15 — PRINT STICKER
 // ============================================================
 
 document.addEventListener('click', (e) => {
@@ -920,23 +863,19 @@ document.addEventListener('click', (e) => {
 
 function generateStickerPreview() {
   const canvas = document.getElementById('qr-canvas');
-  const img    = document.getElementById('qr-img');
-  let qrUrl = null;
-  if (canvas && canvas.style.display !== 'none') qrUrl = canvas.toDataURL('image/png');
-  else if (img) qrUrl = img.src;
+  const qrDataUrl = canvas ? canvas.toDataURL('image/png') : '';
 
   const lat     = currentLat.toFixed(6);
   const lng     = currentLng.toFixed(6);
   const dateStr = new Date().toLocaleDateString('en-GD', { year: 'numeric', month: 'long', day: 'numeric' });
 
-  // Store all data in localStorage so sticker.html (same origin) can read it
   try {
     localStorage.setItem('dac_sticker_data', JSON.stringify({
       code:    currentCode,
       lat,
       lng,
       dateStr,
-      qrUrl:   qrUrl || '',
+      qrUrl:   qrDataUrl,
       stripeLink: STRIPE_PAYMENT_LINK
     }));
   } catch(e) {}
@@ -963,40 +902,6 @@ document.addEventListener('click', (e) => {
 // SECTION 17 — PROPERTY LAYOUT GENERATOR
 // ============================================================
 
-const PRINT_CSS_PAID = `
-  @page { size: A4 portrait; margin: 12mm; }
-  @media print {
-    html, body { background: #fff !important; padding: 0 !important; margin: 0 !important; width: 210mm !important; }
-    body { display: block !important; color: #000 !important; }
-    .no-print, #pay-bar { display: none !important; }
-    .layout-card {
-      border: 1.5px solid #c87700 !important;
-      width: 186mm !important; max-width: 186mm !important;
-      margin: 0 auto !important; background: #fff !important;
-      border-radius: 6px !important; box-shadow: none !important; overflow: hidden !important;
-    }
-    .layout-header { background: #1a1a2e !important; border-color: #c87700 !important; padding: 8px 16px !important; }
-    .header-left .logo      { color: #c87700 !important; font-size: 22px !important; }
-    .header-left .logo-sub  { color: #aaa !important; }
-    .header-right .code       { color: #fff !important; font-size: 15px !important; }
-    .header-right .code-label { color: #aaa !important; }
-    .satellite-wrap { background: #eee !important; border-color: #ddd !important; max-height: 130mm !important; overflow: hidden !important; }
-    .satellite-wrap img.sat-img { width: 100% !important; height: 130mm !important; max-height: 130mm !important; object-fit: cover !important; display: block !important; }
-    .sv-wrap { background: #eee !important; border-color: #ddd !important; max-height: 55mm !important; overflow: hidden !important; }
-    .sv-wrap img.sv-img { width: 100% !important; height: 55mm !important; max-height: 55mm !important; object-fit: cover !important; display: block !important; }
-    .info-row    { border-color: #ddd !important; }
-    .info-fields { background: #fff !important; padding: 10px 16px !important; gap: 6px 20px !important; }
-    .field-label { color: #666 !important; font-size: 8px !important; }
-    .field-value { color: #111 !important; font-size: 11px !important; }
-    .field-value.highlight { color: #c87700 !important; font-size: 13px !important; }
-    .field-value.seafoam   { color: #1a8a6e !important; }
-    .qr-panel { border-color: #ddd !important; min-width: 110px !important; padding: 10px 14px !important; }
-    .qr-panel img { width: 85px !important; height: 85px !important; }
-    .layout-footer { background: #f8f8f8 !important; border-color: #ddd !important; padding: 6px 16px !important; }
-    .layout-footer span { color: #555 !important; font-size: 8px !important; }
-  }
-`;
-
 function generatePropertyLayout(isPaid = false) {
   if (!currentCode || currentLat === null) {
     showToast('Pin a property first');
@@ -1022,13 +927,9 @@ function generatePropertyLayout(isPaid = false) {
   const regionName  = currentRegion ? currentRegion.name : '-';
   const dateStr     = new Date().toLocaleDateString('en-GD', { year: 'numeric', month: 'long', day: 'numeric' });
 
-  let qrDataUrl = '';
-  const qrCanvas = document.getElementById('qr-canvas');
-  const qrImg    = document.getElementById('qr-img');
-  if (qrCanvas && qrCanvas.style.display !== 'none') qrDataUrl = qrCanvas.toDataURL('image/png');
-  else if (qrImg) qrDataUrl = qrImg.src;
+  const canvas = document.getElementById('qr-canvas');
+  const qrDataUrl = canvas ? canvas.toDataURL('image/png') : '';
 
-  // Store all data in localStorage so layout.html (same origin) can read it
   try {
     localStorage.setItem('dac_layout_data', JSON.stringify({
       code:         currentCode,
@@ -1047,6 +948,7 @@ function generatePropertyLayout(isPaid = false) {
 
   window.location.href = 'layout.html';
 }
+
 // ============================================================
 // SECTION 18 — LAYOUT BUTTON HANDLER
 // ============================================================
