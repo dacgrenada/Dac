@@ -427,12 +427,15 @@ body {
   color: var(--text-dim);
 }
 
+/* Canvas QR code styling */
 #qr-canvas {
   border-radius: 6px;
-  max-width: 100%;
   border: 3px solid var(--saffron);
   padding: 8px;
   background: white;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto;
 }
 
 /* ---------- Debug Card ---------- */
@@ -593,7 +596,6 @@ body {
 @media (max-width: 900px) {
   #street-view { height: 200px; }
 }
-
 
 .custom-marker {
   width: 28px;
