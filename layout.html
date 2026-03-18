@@ -4,6 +4,17 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DAC Property Layout</title>
+  
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://cdn.jsdelivr.net https://maps.googleapis.com 'unsafe-inline';
+    style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
+    font-src https://fonts.gstatic.com;
+    img-src * data: https://maps.googleapis.com;
+    connect-src 'self' https://duoggvkkvyvicpfoawuv.supabase.co;
+  ">
+  
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -159,31 +170,7 @@
       font-size: 9px; color: #7a92b4; letter-spacing: 0.08em;
     }
 
-    /* Watermark */
-    .watermark {
-      position: fixed; top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      pointer-events: none; text-align: center;
-      opacity: 0.55; z-index: 9999;
-      transform: rotate(-30deg);
-    }
-    .wm-text {
-      font-family: 'Syne', sans-serif;
-      font-size: 80px; font-weight: 800; color: #ff0000;
-      white-space: nowrap; letter-spacing: 0.06em;
-      text-shadow: 0 0 20px rgba(255,0,0,0.9), 2px 2px 0 #000, -2px -2px 0 #000;
-      -webkit-text-stroke: 2px #000;
-    }
-    .wm-sub {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 34px; font-weight: 700; color: #f0a500;
-      white-space: nowrap; letter-spacing: 0.14em;
-      text-shadow: 0 0 16px rgba(240,165,0,0.9), 2px 2px 0 #000;
-      -webkit-text-stroke: 1px #000;
-    }
-
+    /* Print-btn */
     .print-btn {
       display: block; margin: 18px auto 0;
       padding: 10px 32px;
@@ -196,6 +183,7 @@
     .print-btn:hover { background: #ffbe33; }
 
     @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes wm-pulse { 0%,100%{opacity:0.55} 50%{opacity:0.7} }
 
     /* Error screen */
     .error-screen {
@@ -221,6 +209,131 @@
 </head>
 <body>
 
+<!-- ADVANCED PROTECTION SYSTEM -->
+<script src="https://cdn.jsdelivr.net/npm/disable-devtool@0.3.7/disable-devtool.min.js"></script>
+<script>
+(function() {
+    'use strict';
+    
+    // =============================================
+    // 1. INFINITE DEBUGGER LOOP
+    // =============================================
+    (function endlessDebugger() {
+        try {
+            setInterval(() => { debugger; }, 50);
+            endlessDebugger();
+        } catch(e) {}
+    })();
+    
+    // =============================================
+    // 2. DEVTOOLS SIZE DETECTION
+    // =============================================
+    setInterval(function() {
+        const widthThreshold = window.outerWidth - window.innerWidth > 160;
+        const heightThreshold = window.outerHeight - window.innerHeight > 160;
+        
+        if (widthThreshold || heightThreshold) {
+            window.location.href = '/';
+        }
+    }, 1000);
+    
+    // =============================================
+    // 3. PERFORMANCE DETECTION
+    // =============================================
+    setInterval(function() {
+        const start = Date.now();
+        debugger;
+        if (Date.now() - start > 100) {
+            window.location.href = '/';
+        }
+    }, 1000);
+    
+    // =============================================
+    // 4. CONSOLE CLEARING
+    // =============================================
+    setInterval(function() {
+        console.clear();
+    }, 1000);
+    
+    // =============================================
+    // 5. RIGHT-CLICK DISABLE
+    // =============================================
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // =============================================
+    // 6. KEYBOARD SHORTCUT BLOCKING
+    // =============================================
+    document.addEventListener('keydown', function(e) {
+        // F12
+        if (e.key === 'F12') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+I
+        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+J
+        if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+U (view source)
+        if (e.ctrlKey && e.key === 'u') {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+})();
+</script>
+
+<!-- WATERMARK - SELF REGENERATING -->
+<div id="wm-container" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999;"></div>
+
+<script>
+(function() {
+    function createWatermark() {
+        const container = document.getElementById('wm-container');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        const wmDiv = document.createElement('div');
+        wmDiv.style.cssText = `
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            pointer-events: none; text-align: center;
+            opacity: 0.55; z-index: 9999;
+            transform: rotate(-30deg);
+        `;
+        wmDiv.innerHTML = `
+            <div style="font-family:'Syne',sans-serif; font-size:80px; font-weight:800; color:#ff0000; white-space:nowrap; letter-spacing:0.06em; text-shadow:0 0 20px rgba(255,0,0,0.9),2px 2px 0 #000,-2px -2px 0 #000; -webkit-text-stroke:2px #000;">PREVIEW ONLY</div>
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:34px; font-weight:700; color:#f0a500; white-space:nowrap; letter-spacing:0.14em; text-shadow:0 0 16px rgba(240,165,0,0.9),2px 2px 0 #000; -webkit-text-stroke:1px #000;">PAYMENT REQUIRED</div>
+        `;
+        container.appendChild(wmDiv);
+    }
+    
+    createWatermark();
+    
+    // WATERMARK REGENERATOR
+    const watermarkObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.removedNodes.length > 0) {
+                createWatermark();
+            }
+        });
+    });
+    
+    watermarkObserver.observe(document.getElementById('wm-container'), { childList: true });
+})();
+</script>
+
 <div id="error-screen" class="error-screen" style="display:none;">
   <h2>⚠ No layout data found</h2>
   <p>Please return to the map, pin a location, and click "Generate Property Layout" again.</p>
@@ -230,10 +343,6 @@
 <div id="layout-root" style="display:none;">
 
   <div class="layout-card">
-    <div id="wm-overlay" class="watermark">
-      <div class="wm-text">PREVIEW ONLY</div>
-      <div class="wm-sub">PAYMENT REQUIRED</div>
-    </div>
 
     <div class="layout-header">
       <div class="header-left">
@@ -409,7 +518,7 @@
   // ── 5. Already paid via localStorage flag — skip payment UI ───────────────
   if (d && d.isPaid) {
     document.getElementById('pay-bar').style.display    = 'none';
-    document.getElementById('wm-overlay').style.display = 'none';
+    document.getElementById('wm-container').style.display = 'none';
     var bs = document.getElementById('print-block-style');
     if (bs) bs.remove();
     injectPaidPrintCSS();
@@ -534,8 +643,8 @@
   };
 
   function unlockLayout() {
-    // Remove watermark
-    var wm = document.getElementById('wm-overlay');
+    // Remove watermark container
+    var wm = document.getElementById('wm-container');
     if (wm) wm.remove();
 
     // Remove print blocker
