@@ -4,6 +4,17 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DAC Admin Panel</title>
+  
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://cdn.jsdelivr.net https://cdn.jsdelivr.net 'unsafe-inline';
+    style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
+    font-src https://fonts.gstatic.com;
+    img-src * data:;
+    connect-src 'self' https://duoggvkkvyvicpfoawuv.supabase.co;
+  ">
+  
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -149,6 +160,131 @@
   </style>
 </head>
 <body>
+
+<!-- ADVANCED PROTECTION SYSTEM -->
+<script src="https://cdn.jsdelivr.net/npm/disable-devtool@0.3.7/disable-devtool.min.js"></script>
+<script>
+(function() {
+    'use strict';
+    
+    // =============================================
+    // 1. INFINITE DEBUGGER LOOP
+    // =============================================
+    (function endlessDebugger() {
+        try {
+            setInterval(() => { debugger; }, 50);
+            endlessDebugger();
+        } catch(e) {}
+    })();
+    
+    // =============================================
+    // 2. DEVTOOLS SIZE DETECTION
+    // =============================================
+    setInterval(function() {
+        const widthThreshold = window.outerWidth - window.innerWidth > 160;
+        const heightThreshold = window.outerHeight - window.innerHeight > 160;
+        
+        if (widthThreshold || heightThreshold) {
+            window.location.href = '/';
+        }
+    }, 1000);
+    
+    // =============================================
+    // 3. PERFORMANCE DETECTION
+    // =============================================
+    setInterval(function() {
+        const start = Date.now();
+        debugger;
+        if (Date.now() - start > 100) {
+            window.location.href = '/';
+        }
+    }, 1000);
+    
+    // =============================================
+    // 4. SELF-REGENERATING ADMIN WATERMARK
+    // =============================================
+    function addWatermark() {
+        if (document.querySelector('[data-dac-protect="admin-wm"]')) return;
+        
+        const wm = document.createElement('div');
+        wm.setAttribute('data-dac-protect', 'admin-wm');
+        wm.innerHTML = '🔐 ADMIN PANEL · DAC GRENADA';
+        wm.style.cssText = `
+            position: fixed;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.15;
+            z-index: 999999;
+            pointer-events: none;
+            color: #f0a500;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        `;
+        document.body.appendChild(wm);
+    }
+    
+    addWatermark();
+    
+    // WATERMARK REGENERATOR
+    const watermarkObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            mutation.removedNodes.forEach(function(node) {
+                if (node.nodeType === 1 && node.getAttribute && node.getAttribute('data-dac-protect') === 'admin-wm') {
+                    addWatermark();
+                }
+            });
+        });
+    });
+    
+    watermarkObserver.observe(document.body, { childList: true, subtree: true });
+    
+    // =============================================
+    // 5. CONSOLE CLEARING
+    // =============================================
+    setInterval(function() {
+        console.clear();
+    }, 1000);
+    
+    // =============================================
+    // 6. RIGHT-CLICK DISABLE
+    // =============================================
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // =============================================
+    // 7. KEYBOARD SHORTCUT BLOCKING
+    // =============================================
+    document.addEventListener('keydown', function(e) {
+        // F12
+        if (e.key === 'F12') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+I
+        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+J
+        if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+U (view source)
+        if (e.ctrlKey && e.key === 'u') {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+})();
+</script>
 
 <!-- ── Login Screen ─────────────────────────────────── -->
 <div id="login-screen">
