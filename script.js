@@ -1,5 +1,5 @@
 // =============================================
-// DAC - SIMPLIFIED WORKING VERSION
+// DAC - DEBUG VERSION
 // =============================================
 
 'use strict';
@@ -32,6 +32,8 @@ let qrCanvas = null;
 // MAP INITIALIZATION
 // =============================================
 function initMap() {
+    console.log('✅ Map initializing...');
+    
     map = new google.maps.Map(document.getElementById('map'), {
         center: { lat: 12.1165, lng: -61.6790 },
         zoom: 11,
@@ -55,6 +57,8 @@ function initMap() {
             fillOpacity: 0.03
         });
     });
+    
+    console.log('✅ Map ready');
 }
 
 // =============================================
@@ -64,12 +68,16 @@ function handleMapClick(e) {
     const lat = e.latLng.lat();
     const lng = e.latLng.lng();
     
+    console.log('📍 Click at:', lat, lng);
+    
     // Find parish
     const parish = findParish(lat, lng);
     currentParish = parish;
+    console.log('📍 Parish:', parish.name);
     
     // Generate code
     const code = generateCode(lat, lng, parish.code);
+    console.log('📍 Code generated:', code);
     
     // Save to global variables
     currentCode = code;
@@ -169,6 +177,7 @@ function generateQR(lat, lng) {
         // Save canvas reference
         setTimeout(() => {
             qrCanvas = container.querySelector('canvas');
+            console.log('✅ QR code generated');
         }, 100);
     }
 }
@@ -180,7 +189,10 @@ function generateQR(lat, lng) {
 // Print Sticker
 document.addEventListener('click', function(e) {
     if (e.target.id === 'btn-print') {
+        console.log('🖨️ Print button clicked');
+        
         if (!currentCode) {
+            console.log('❌ No code selected');
             showToast('Please select a location first');
             return;
         }
@@ -189,6 +201,7 @@ document.addEventListener('click', function(e) {
         let qrDataUrl = '';
         if (qrCanvas) {
             qrDataUrl = qrCanvas.toDataURL('image/png');
+            console.log('✅ QR captured');
         }
         
         // Prepare sticker data
@@ -205,9 +218,14 @@ document.addEventListener('click', function(e) {
             qrUrl: qrDataUrl
         };
         
+        console.log('📦 Sticker data:', stickerData);
+        
         // Save to localStorage
         localStorage.setItem('dac_sticker_data', JSON.stringify(stickerData));
-        console.log('Sticker data saved:', stickerData);
+        
+        // Verify it saved
+        const check = localStorage.getItem('dac_sticker_data');
+        console.log('✅ Verified saved:', check ? 'YES' : 'NO');
         
         // Open sticker page
         window.open('sticker.html', '_blank');
@@ -217,7 +235,10 @@ document.addEventListener('click', function(e) {
 // Property Layout
 document.addEventListener('click', function(e) {
     if (e.target.id === 'btn-layout') {
+        console.log('🗺️ Layout button clicked');
+        
         if (!currentCode) {
+            console.log('❌ No code selected');
             showToast('Please select a location first');
             return;
         }
@@ -226,6 +247,7 @@ document.addEventListener('click', function(e) {
         let qrDataUrl = '';
         if (qrCanvas) {
             qrDataUrl = qrCanvas.toDataURL('image/png');
+            console.log('✅ QR captured');
         }
         
         // Prepare layout data
@@ -233,7 +255,7 @@ document.addEventListener('click', function(e) {
             code: currentCode,
             lat: currentLat.toFixed(7),
             lng: currentLng.toFixed(7),
-            parish: currentParish.name,
+            regionName: currentParish.name,
             dateStr: new Date().toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
@@ -243,9 +265,14 @@ document.addEventListener('click', function(e) {
             staticMapUrl: `https://maps.googleapis.com/maps/api/staticmap?center=${currentLat},${currentLng}&zoom=19&size=800x400&maptype=satellite&markers=color:red%7C${currentLat},${currentLng}&key=${MAPS_API_KEY}`
         };
         
+        console.log('📦 Layout data:', layoutData);
+        
         // Save to localStorage
         localStorage.setItem('dac_layout_data', JSON.stringify(layoutData));
-        console.log('Layout data saved:', layoutData);
+        
+        // Verify it saved
+        const check = localStorage.getItem('dac_layout_data');
+        console.log('✅ Verified saved:', check ? 'YES' : 'NO');
         
         // Go to layout page
         window.location.href = 'layout.html';
@@ -274,9 +301,16 @@ document.addEventListener('click', function(e) {
         
         if (key && registry[key]) {
             const loc = registry[key];
-            map.panTo({ lat: loc.lat, lng: loc.lng });
+            map.panTo({ lat: parseFloat(loc.lat), lng: parseFloat(loc.lng) });
             map.setZoom(18);
-            handleMapClick({ latLng: { lat: () => loc.lat, lng: () => loc.lng } });
+            
+            // Trigger click handler
+            handleMapClick({ 
+                latLng: { 
+                    lat: () => parseFloat(loc.lat), 
+                    lng: () => parseFloat(loc.lng) 
+                } 
+            });
         } else {
             showToast('Code not found');
         }
@@ -287,6 +321,7 @@ document.addEventListener('click', function(e) {
 // UTILITIES
 // =============================================
 function showToast(msg) {
+    console.log('🔔 Toast:', msg);
     const toast = document.getElementById('toast');
     if (toast) {
         toast.textContent = msg;
