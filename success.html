@@ -5,203 +5,139 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Payment Successful – DAC Digital Address Codes</title>
   
-  <!-- STRICT Content Security Policy -->
+  <!-- Content Security Policy -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
-    script-src 'self' https://duoggvkkvyvicpfoawuv.supabase.co;
-    style-src 'self' https://fonts.googleapis.com;
+    script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline';
+    style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
     font-src https://fonts.gstatic.com;
     img-src * data:;
     connect-src 'self' https://duoggvkkvyvicpfoawuv.supabase.co;
-    frame-src 'none';
-    object-src 'none';
-    base-uri 'self';
   ">
   
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
-    :root { 
-      --navy:#0c1220; 
-      --navy-2:#141e30; 
-      --navy-3:#1e2d44; 
-      --saffron:#f0a500; 
-      --seafoam:#3abf9e; 
-      --coral:#e85d3a; 
-      --text:#e8eef6; 
-      --dim:#7a92b4; 
-    }
-    
-    *,*::before,*::after {
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
-    }
-    
-    html {
-      font-size:16px;
-      -webkit-font-smoothing:antialiased;
-    }
-    
-    body {
-      background:var(--navy);
-      color:var(--text);
-      font-family:'DM Sans',sans-serif;
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      padding:2rem;
-      position:relative;
-    }
-    
-    /* Permanent watermark */
-    body::after {
-      content: "🔒 SECURE · " attr(data-timestamp);
-      position: fixed;
-      bottom: 5px;
-      left: 5px;
-      font-size: 9px;
-      color: rgba(240,165,0,0.2);
-      font-family: monospace;
-      pointer-events: none;
-      z-index: 999999;
-    }
-    
-    .card {
-      background:var(--navy-2);
-      border:2px solid var(--seafoam);
-      border-radius:14px;
-      max-width:520px;
-      width:100%;
-      padding:2.5rem 2rem;
-      text-align:center;
-      box-shadow:0 8px 40px rgba(0,0,0,0.5);
-      position:relative;
-      z-index:1;
-    }
-    
-    .success-icon {
-      font-size:3.5rem;
-      margin-bottom:1rem;
-    }
-    
-    h1 {
-      font-family:'Syne',sans-serif;
-      font-size:1.8rem;
-      font-weight:800;
-      color:var(--seafoam);
-      margin-bottom:0.4rem;
-    }
-    
-    .sub {
-      font-size:0.9rem;
-      color:var(--dim);
-      margin-bottom:1.8rem;
-    }
-    
-    .code-block {
-      background:var(--navy-3);
-      border:1px solid rgba(240,165,0,0.3);
-      border-radius:8px;
-      padding:1rem 1.5rem;
-      margin-bottom:1.5rem;
-    }
-    
-    .code-label {
-      font-family:'IBM Plex Mono',monospace;
-      font-size:0.65rem;
-      text-transform:uppercase;
-      letter-spacing:0.12em;
-      color:var(--dim);
-      margin-bottom:0.4rem;
-    }
-    
-    .dac-code {
-      font-family:'IBM Plex Mono',monospace;
-      font-size:1.5rem;
-      font-weight:600;
-      color:var(--saffron);
-      letter-spacing:0.08em;
-      word-break:break-all;
-    }
-    
-    .unlocked-badge {
-      display:inline-block;
-      background:var(--seafoam);
-      color:var(--navy);
-      font-family:'IBM Plex Mono',monospace;
-      font-size:0.7rem;
-      font-weight:700;
-      letter-spacing:0.1em;
-      padding:3px 10px;
-      border-radius:100px;
-      margin-top:0.5rem;
-    }
-    
-    .error-msg {
-      background:rgba(232,93,58,0.12);
-      border:1px solid rgba(232,93,58,0.4);
-      color:var(--coral);
-      border-radius:8px;
-      padding:0.75rem 1rem;
-      font-size:0.82rem;
-      margin-bottom:1.2rem;
-      display:none;
-    }
-    
-    .processing {
-      font-family:'IBM Plex Mono',monospace;
-      font-size:0.78rem;
-      color:var(--saffron);
-      margin-bottom:1rem;
-    }
-    
-    .verifying-bar {
-      font-family:'IBM Plex Mono',monospace;
-      font-size:0.78rem;
-      color:var(--saffron);
-      margin:1rem 0;
-      padding:0.75rem;
-      background:rgba(240,165,0,0.08);
-      border-radius:6px;
-    }
-    
-    #countdown-msg {
-      font-family:'IBM Plex Mono',monospace;
-      font-size:0.75rem;
-      color:var(--dim);
-      margin-top:1.5rem;
-      text-align:center;
-    }
-    
-    .footer-note {
-      margin-top:2rem;
-      font-family:'IBM Plex Mono',monospace;
-      font-size:0.65rem;
-      color:var(--dim);
-      opacity:0.6;
-      letter-spacing:0.06em;
-    }
-    
-    .hidden {
-      display:none !important;
-    }
+    :root { --navy:#0c1220; --navy-2:#141e30; --navy-3:#1e2d44; --saffron:#f0a500; --seafoam:#3abf9e; --coral:#e85d3a; --text:#e8eef6; --dim:#7a92b4; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{font-size:16px;-webkit-font-smoothing:antialiased;}
+    body{background:var(--navy);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+    .card{background:var(--navy-2);border:2px solid var(--seafoam);border-radius:14px;max-width:520px;width:100%;padding:2.5rem 2rem;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.5);}
+    .success-icon{font-size:3.5rem;margin-bottom:1rem;}
+    h1{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--seafoam);margin-bottom:0.4rem;}
+    .sub{font-size:0.9rem;color:var(--dim);margin-bottom:1.8rem;}
+    .code-block{background:var(--navy-3);border:1px solid rgba(240,165,0,0.3);border-radius:8px;padding:1rem 1.5rem;margin-bottom:1.5rem;}
+    .code-label{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--dim);margin-bottom:0.4rem;}
+    .dac-code{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:600;color:var(--saffron);letter-spacing:0.08em;word-break:break-all;}
+    .unlocked-badge{display:inline-block;background:var(--seafoam);color:var(--navy);font-family:'IBM Plex Mono',monospace;font-size:0.7rem;font-weight:700;letter-spacing:0.1em;padding:3px 10px;border-radius:100px;margin-top:0.5rem;}
+    .error-msg{background:rgba(232,93,58,0.12);border:1px solid rgba(232,93,58,0.4);color:var(--coral);border-radius:8px;padding:0.75rem 1rem;font-size:0.82rem;margin-bottom:1.2rem;display:none;}
+    .processing{font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:var(--saffron);margin-bottom:1rem;}
+    #countdown-msg{font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:var(--dim);margin-top:1.5rem;text-align:center;}
+    .footer-note{margin-top:2rem;font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--dim);opacity:0.6;letter-spacing:0.06em;}
   </style>
 </head>
-<body data-timestamp="">
+<body>
+
+<!-- ADVANCED PROTECTION SYSTEM -->
+<script src="https://cdn.jsdelivr.net/npm/disable-devtool@0.3.7/disable-devtool.min.js"></script>
+<script>
+(function() {
+    'use strict';
+    
+    // =============================================
+    // 1. INFINITE DEBUGGER LOOP
+    // =============================================
+    (function endlessDebugger() {
+        try {
+            setInterval(() => { debugger; }, 50);
+            endlessDebugger();
+        } catch(e) {}
+    })();
+    
+    // =============================================
+    // 2. DEVTOOLS SIZE DETECTION
+    // =============================================
+    setInterval(function() {
+        const widthThreshold = window.outerWidth - window.innerWidth > 160;
+        const heightThreshold = window.outerHeight - window.innerHeight > 160;
+        
+        if (widthThreshold || heightThreshold) {
+            window.location.href = '/';
+        }
+    }, 1000);
+    
+    // =============================================
+    // 3. PERFORMANCE DETECTION
+    // =============================================
+    setInterval(function() {
+        const start = Date.now();
+        debugger;
+        if (Date.now() - start > 100) {
+            window.location.href = '/';
+        }
+    }, 1000);
+    
+    // =============================================
+    // 4. CONSOLE CLEARING
+    // =============================================
+    setInterval(function() {
+        console.clear();
+    }, 1000);
+    
+    // =============================================
+    // 5. SUBTLE WATERMARK
+    // =============================================
+    const wm = document.createElement('div');
+    wm.style.cssText = 'position:fixed; bottom:5px; left:5px; opacity:0.1; color:#f0a500; font-family:monospace; font-size:9px; pointer-events:none; z-index:9999;';
+    wm.textContent = 'DAC GRENADA';
+    document.body.appendChild(wm);
+    
+    // =============================================
+    // 6. RIGHT-CLICK DISABLE
+    // =============================================
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // =============================================
+    // 7. KEYBOARD SHORTCUT BLOCKING
+    // =============================================
+    document.addEventListener('keydown', function(e) {
+        // F12
+        if (e.key === 'F12') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+I
+        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+J
+        if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+U (view source)
+        if (e.ctrlKey && e.key === 'u') {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+})();
+</script>
 
 <div class="card">
   <div class="success-icon">✅</div>
   <h1>Payment Successful!</h1>
-  <p class="sub" id="sub-msg">Verifying your payment and generating secure access...</p>
+  <p class="sub" id="sub-msg">Verifying your payment and generating your secure access token…</p>
   <div class="error-msg" id="error-msg"></div>
-  <div class="processing" id="processing-msg">🔐 Contacting secure server...</div>
-  <div class="verifying-bar" id="verifying-bar"></div>
-  <div class="code-block hidden" id="code-block">
+  <div class="processing" id="processing-msg">🔐 Contacting server…</div>
+  <div class="code-block" id="code-block" style="display:none;">
     <div class="code-label">Unlocked DAC Address Code</div>
     <div class="dac-code" id="code-display">—</div>
-    <div class="unlocked-badge">🔓 PAID · ONE-TIME ACCESS</div>
+    <div class="unlocked-badge">🔓 PAID · WATERMARK-FREE</div>
   </div>
   <p id="countdown-msg"></p>
 </div>
@@ -211,140 +147,93 @@
 (function() {
   'use strict';
 
-  // =============================================
-  // SECURE CONFIGURATION
-  // =============================================
-  const SUPABASE_URL = 'https://duoggvkkvyvicpfoawuv.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
-  
-  // Set timestamp for watermark
-  document.body.setAttribute('data-timestamp', new Date().toISOString());
+  var SUPABASE_URL = 'https://duoggvkkvyvicpfoawuv.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
 
-  // =============================================
-  // GET PAYMENT INFORMATION
-  // =============================================
-  const urlParams = new URLSearchParams(window.location.search);
-  let pendingCode = (urlParams.get('code') || '').trim().toUpperCase();
-  let sessionId = urlParams.get('session_id') || '';
-  
-  // Fallback to session storage (not localStorage)
+  // 1. Get DAC code
+  var params      = new URLSearchParams(window.location.search);
+  var pendingCode = (params.get('code') || '').trim().toUpperCase();
   if (!pendingCode) {
-    try { 
-      pendingCode = (sessionStorage.getItem('dac_pending_code') || '').trim().toUpperCase(); 
-    } catch(e) {}
+    try { pendingCode = (localStorage.getItem('dac_pending_payment_code') || '').trim().toUpperCase(); } catch(e) {}
   }
 
   if (!pendingCode) {
     document.getElementById('error-msg').style.display = 'block';
-    document.getElementById('error-msg').textContent = 'No DAC code found. Please return to the map and try again.';
-    document.getElementById('processing-msg').classList.add('hidden');
-    document.getElementById('sub-msg').textContent = 'Verification failed';
+    document.getElementById('error-msg').textContent   = 'No DAC code found. Return to the map and try again.';
+    document.getElementById('processing-msg').style.display = 'none';
+    document.getElementById('sub-msg').textContent = 'Something went wrong.';
     return;
   }
 
-  document.getElementById('code-display').textContent = pendingCode;
-  document.getElementById('code-block').classList.remove('hidden');
+  document.getElementById('code-display').textContent  = pendingCode;
+  document.getElementById('code-block').style.display  = 'block';
 
-  // Determine product type
-  let returnPage = 'layout.html';
-  let product = 'layout';
+  // 2. Which product?
+  var returnPage = 'layout.html';
   try {
-    const trigger = sessionStorage.getItem('dac_payment_trigger') || 'layout';
-    returnPage = (trigger === 'sticker') ? 'sticker.html' : 'layout.html';
-    product = (trigger === 'sticker') ? 'sticker' : 'layout';
+    var trigger = localStorage.getItem('dac_payment_trigger') || 'layout';
+    returnPage  = (trigger === 'sticker') ? 'sticker.html' : 'layout.html';
   } catch(e) {}
 
-  // =============================================
-  // POLL FOR TOKEN (VIA EDGE FUNCTION)
-  // =============================================
-  let attempts = 0;
-  const maxAttempts = 30; // 30 × 2s = 60s
-  let polling = true;
+  // 3. Poll Supabase until the webhook has written the token (max 30s)
+  var attempts = 0;
+  var maxAttempts = 15; // 15 × 2s = 30s
+  var product  = (returnPage === 'sticker.html') ? 'sticker' : 'layout';
 
   function pollForToken() {
-    if (!polling) return;
-    
     attempts++;
-    document.getElementById('processing-msg').textContent = 
-      `🔐 Verifying with secure server... (${attempts}/${maxAttempts})`;
+    document.getElementById('processing-msg').textContent =
+      '🔐 Verifying with server… (' + attempts + '/' + maxAttempts + ')';
 
-    // Call our edge function instead of direct DB access
-    fetch(`${SUPABASE_URL}/functions/v1/stripe-webhook?poll=true`, {
-      method: 'POST',
+    fetch(SUPABASE_URL + '/rest/v1/dac_payments?dac_code=eq.' +
+          encodeURIComponent(pendingCode) +
+          '&product=eq.' + product +
+          '&used=eq.false&order=created_at.desc&limit=1&select=token', {
       headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        dac_code: pendingCode,
-        product: product,
-        session_id: sessionId
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.token && data.session_token) {
-        // Success! Clear storage and redirect
-        try {
-          sessionStorage.removeItem('dac_pending_code');
-          sessionStorage.removeItem('dac_payment_trigger');
-        } catch(e) {}
-        
-        document.getElementById('processing-msg').textContent = '✅ Verified! Redirecting...';
-        document.getElementById('sub-msg').textContent = 'Payment confirmed. Taking you to your content...';
-        
-        setTimeout(() => {
-          window.location.href = `${returnPage}?session=${data.session_token}`;
-        }, 1500);
-        
-        polling = false;
-      } 
-      else if (data.pending && attempts < maxAttempts) {
-        // Still waiting for webhook
-        setTimeout(pollForToken, 2000);
-      } 
-      else if (attempts < maxAttempts) {
-        // No token yet, keep polling
-        setTimeout(pollForToken, 2000);
-      } 
-      else {
-        // Timeout - show error but don't expose sensitive info
-        document.getElementById('processing-msg').classList.add('hidden');
-        document.getElementById('error-msg').style.display = 'block';
-        document.getElementById('error-msg').textContent = 
-          'Payment received but verification delayed. Check your email in 5 minutes.';
-        document.getElementById('sub-msg').textContent = 'Thank you for your payment!';
-        
-        // Store in session for later retry
-        sessionStorage.setItem('dac_pending_verification', pendingCode);
-        polling = false;
+        'apikey':        SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
       }
     })
-    .catch(error => {
-      console.error('Poll error:', error);
-      
-      if (attempts < maxAttempts) {
-        // Retry on network error
-        setTimeout(pollForToken, 3000);
+    .then(function(r) { return r.json(); })
+    .then(function(rows) {
+      if (rows && rows.length > 0 && rows[0].token) {
+        // Token found — redirect back to sticker/layout with token in URL
+        var token = rows[0].token;
+        try { localStorage.removeItem('dac_pending_payment_code'); } catch(e) {}
+        try { localStorage.removeItem('dac_payment_trigger'); } catch(e) {}
+        document.getElementById('processing-msg').textContent = '✅ Verified! Redirecting…';
+        document.getElementById('sub-msg').textContent = 'Payment confirmed. Taking you back now…';
+        // Redirect with secure token in URL
+        setTimeout(function() {
+          window.location.href = returnPage + '?token=' + encodeURIComponent(token);
+        }, 1500);
+      } else if (attempts < maxAttempts) {
+        // Not yet — wait 2 seconds and try again
+        setTimeout(pollForToken, 2000);
       } else {
-        document.getElementById('processing-msg').classList.add('hidden');
+        // Timeout — show manual instructions
+        document.getElementById('processing-msg').style.display = 'none';
         document.getElementById('error-msg').style.display = 'block';
-        document.getElementById('error-msg').textContent = 
-          'Connection issue. Please check your email in 5 minutes.';
-        document.getElementById('sub-msg').textContent = 'Payment received!';
-        polling = false;
+        document.getElementById('error-msg').textContent =
+          'Payment verified by Stripe but server is slow. ' +
+          'Please email dac.grenada@gmail.com with your DAC code: ' + pendingCode;
+        document.getElementById('sub-msg').textContent = 'Your payment was received ✅';
+      }
+    })
+    .catch(function(err) {
+      console.error(err);
+      if (attempts < maxAttempts) {
+        setTimeout(pollForToken, 2000);
+      } else {
+        document.getElementById('processing-msg').style.display = 'none';
+        document.getElementById('error-msg').style.display = 'block';
+        document.getElementById('error-msg').textContent = 'Network error. Please email dac.grenada@gmail.com with your DAC code: ' + pendingCode;
+        document.getElementById('sub-msg').textContent = 'Your payment was received ✅';
       }
     });
   }
 
-  // Start polling
   pollForToken();
-
-  // =============================================
-  // CLEANUP OLD DATA
-  // =============================================
-  window.addEventListener('beforeunload', function() {
-    polling = false;
-  });
 
 })();
 </script>

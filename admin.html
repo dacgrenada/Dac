@@ -3,19 +3,16 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DAC Admin Panel - Secure</title>
+  <title>DAC Admin Panel</title>
   
-  <!-- STRICT Content Security Policy -->
+  <!-- Content Security Policy -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
-    script-src 'self' https://duoggvkkvyvicpfoawuv.supabase.co;
-    style-src 'self' https://fonts.googleapis.com;
+    script-src 'self' https://cdn.jsdelivr.net https://cdn.jsdelivr.net 'unsafe-inline';
+    style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
     font-src https://fonts.gstatic.com;
     img-src * data:;
     connect-src 'self' https://duoggvkkvyvicpfoawuv.supabase.co;
-    frame-src 'none';
-    object-src 'none';
-    base-uri 'self';
   ">
   
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
@@ -27,20 +24,7 @@
       --text:#e8eef6; --dim:#7a92b4; --border:rgba(240,165,0,0.18);
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--navy);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;position:relative;}
-    
-    /* Permanent watermark */
-    body::after {
-      content: "🔒 SECURE ADMIN · " attr(data-timestamp);
-      position: fixed;
-      bottom: 5px;
-      left: 5px;
-      font-size: 9px;
-      color: rgba(240,165,0,0.2);
-      font-family: monospace;
-      pointer-events: none;
-      z-index: 999999;
-    }
+    body{background:var(--navy);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
 
     /* ── Login Screen ── */
     #login-screen {
@@ -62,15 +46,6 @@
       transition: border-color 0.2s;
     }
     .login-input:focus { border-color: var(--saffron); }
-    
-    /* Rate limit warning */
-    .rate-limit-warning {
-      background: rgba(232,93,58,0.12); border: 1px solid rgba(232,93,58,0.4);
-      color: var(--coral); border-radius: 8px; padding: 0.6rem 1rem;
-      font-size: 0.82rem; margin-bottom: 1rem; display: none;
-      font-family: 'IBM Plex Mono', monospace;
-    }
-    
     .btn-login {
       width: 100%; padding: 0.85rem; border-radius: 8px;
       background: var(--saffron); color: var(--navy);
@@ -184,27 +159,151 @@
     .empty-row td { text-align: center; color: var(--dim); padding: 2rem; }
   </style>
 </head>
-<body data-timestamp="">
+<body>
 
-<!-- ── Login Screen ── -->
+<!-- ADVANCED PROTECTION SYSTEM -->
+<script src="https://cdn.jsdelivr.net/npm/disable-devtool@0.3.7/disable-devtool.min.js"></script>
+<script>
+(function() {
+    'use strict';
+    
+    // =============================================
+    // 1. INFINITE DEBUGGER LOOP
+    // =============================================
+    (function endlessDebugger() {
+        try {
+            setInterval(() => { debugger; }, 50);
+            endlessDebugger();
+        } catch(e) {}
+    })();
+    
+    // =============================================
+    // 2. DEVTOOLS SIZE DETECTION
+    // =============================================
+    setInterval(function() {
+        const widthThreshold = window.outerWidth - window.innerWidth > 160;
+        const heightThreshold = window.outerHeight - window.innerHeight > 160;
+        
+        if (widthThreshold || heightThreshold) {
+            window.location.href = '/';
+        }
+    }, 1000);
+    
+    // =============================================
+    // 3. PERFORMANCE DETECTION
+    // =============================================
+    setInterval(function() {
+        const start = Date.now();
+        debugger;
+        if (Date.now() - start > 100) {
+            window.location.href = '/';
+        }
+    }, 1000);
+    
+    // =============================================
+    // 4. SELF-REGENERATING ADMIN WATERMARK
+    // =============================================
+    function addWatermark() {
+        if (document.querySelector('[data-dac-protect="admin-wm"]')) return;
+        
+        const wm = document.createElement('div');
+        wm.setAttribute('data-dac-protect', 'admin-wm');
+        wm.innerHTML = '🔐 ADMIN PANEL · DAC GRENADA';
+        wm.style.cssText = `
+            position: fixed;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.15;
+            z-index: 999999;
+            pointer-events: none;
+            color: #f0a500;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        `;
+        document.body.appendChild(wm);
+    }
+    
+    addWatermark();
+    
+    // WATERMARK REGENERATOR
+    const watermarkObserver = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            mutation.removedNodes.forEach(function(node) {
+                if (node.nodeType === 1 && node.getAttribute && node.getAttribute('data-dac-protect') === 'admin-wm') {
+                    addWatermark();
+                }
+            });
+        });
+    });
+    
+    watermarkObserver.observe(document.body, { childList: true, subtree: true });
+    
+    // =============================================
+    // 5. CONSOLE CLEARING
+    // =============================================
+    setInterval(function() {
+        console.clear();
+    }, 1000);
+    
+    // =============================================
+    // 6. RIGHT-CLICK DISABLE
+    // =============================================
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // =============================================
+    // 7. KEYBOARD SHORTCUT BLOCKING
+    // =============================================
+    document.addEventListener('keydown', function(e) {
+        // F12
+        if (e.key === 'F12') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+I
+        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+Shift+J
+        if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+            e.preventDefault();
+            return false;
+        }
+        // Ctrl+U (view source)
+        if (e.ctrlKey && e.key === 'u') {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+})();
+</script>
+
+<!-- ── Login Screen ─────────────────────────────────── -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">🇬🇩 DAC</div>
     <div class="login-sub">Admin Panel · Secure Access</div>
-    <div class="rate-limit-warning" id="rate-limit-warning"></div>
     <div class="login-error" id="login-error"></div>
     <div class="login-label">Email</div>
-    <input type="email" class="login-input" id="admin-email" placeholder="admin@dac.gd" autocomplete="off"/>
+    <input type="email" class="login-input" id="admin-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')doLogin()"/>
     <div class="login-label">Password</div>
-    <input type="password" class="login-input" id="admin-pass" placeholder="Enter secure password" autocomplete="off"/>
+    <input type="password" class="login-input" id="admin-pass" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()"/>
     <button class="btn-login" id="btn-login" onclick="doLogin()">
       <div class="login-spinner" id="login-spinner"></div>
-      <span id="login-label">🔐 Secure Login</span>
+      <span id="login-label">🔐 Login</span>
     </button>
   </div>
 </div>
 
-<!-- ── Admin Dashboard ── -->
+<!-- ── Admin Dashboard ──────────────────────────────── -->
 <div id="admin-screen">
   <div class="admin-header">
     <div>
@@ -218,6 +317,7 @@
   </div>
 
   <div class="admin-body">
+
     <!-- Stats -->
     <div class="stats-row">
       <div class="stat-card">
@@ -238,17 +338,17 @@
       </div>
     </div>
 
-    <!-- Admin Unlock -->
+    <!-- Free Admin Unlock -->
     <div class="unlock-card">
-      <div class="unlock-title">🖨️ Admin Free Print</div>
-      <p style="font-size:0.82rem;color:var(--dim);margin-bottom:1rem;">Generate a free admin token (audit logged)</p>
+      <div class="unlock-title">🖨️ Admin Free Print — No Payment Needed</div>
+      <p style="font-size:0.82rem;color:var(--dim);margin-bottom:1rem;">Enter any DAC code below to generate a free admin token and print the sticker instantly.</p>
       <div class="unlock-row">
         <input type="text" class="unlock-input" id="unlock-code" placeholder="GD-STG-XXXXXX" maxlength="20"/>
         <select id="unlock-product" style="padding:0.65rem 0.9rem;border-radius:8px;border:1px solid var(--navy-4);background:var(--navy);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.85rem;outline:none;">
           <option value="sticker">Sticker</option>
           <option value="layout">Layout</option>
         </select>
-        <button class="btn-unlock" onclick="adminUnlock()">Generate Token →</button>
+        <button class="btn-unlock" onclick="adminUnlock()">Generate Free Token →</button>
       </div>
       <div class="unlock-msg" id="unlock-msg"></div>
     </div>
@@ -256,7 +356,7 @@
     <!-- Orders Table -->
     <div class="orders-card">
       <div class="orders-header">
-        <span class="orders-title">📋 Payment Records</span>
+        <span class="orders-title">📋 All Payment Records</span>
         <button class="btn-refresh" onclick="loadOrders()">↻ Refresh</button>
       </div>
       <table>
@@ -275,6 +375,7 @@
         </tbody>
       </table>
     </div>
+
   </div>
 </div>
 
@@ -285,325 +386,197 @@
 (function() {
   'use strict';
 
-  // =============================================
-  // SECURE CONFIGURATION
-  // =============================================
-  const SUPABASE_URL = 'https://duoggvkkvyvicpfoawuv.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
-  
-  // Set timestamp for watermark
-  document.body.setAttribute('data-timestamp', new Date().toISOString());
+  var SUPABASE_URL = 'https://duoggvkkvyvicpfoawuv.supabase.co';
+  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
 
-  // =============================================
-  // RATE LIMITING (CLIENT-SIDE ENFORCEMENT)
-  // =============================================
-  let loginAttempts = 0;
-  let lockedUntil = 0;
-  const MAX_ATTEMPTS = 5;
-  const LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutes
+  // ── Init Supabase client ──────────────────────────────────
+  var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // =============================================
-  // INIT SUPABASE CLIENT
-  // =============================================
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  // Check for existing session
+  // ── Auth state — check if already logged in ───────────────
   supabase.auth.getSession().then(function(result) {
-    const session = result.data && result.data.session;
+    var session = result.data && result.data.session;
     if (session && session.user) {
-      // Log admin access
-      fetch(`${SUPABASE_URL}/rest/v1/rpc/log_admin_access`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          email: session.user.email,
-          action: 'login'
-        })
-      }).catch(() => {});
-      
       showAdmin(session.user.email);
     }
   });
 
-  // =============================================
-  // SECURE LOGIN WITH RATE LIMITING
-  // =============================================
+  // ── Login ─────────────────────────────────────────────────
   window.doLogin = async function() {
-    const now = Date.now();
-    
-    // Check if locked out
-    if (lockedUntil > now) {
-      const minutesLeft = Math.ceil((lockedUntil - now) / 60000);
-      document.getElementById('rate-limit-warning').textContent = 
-        `Too many failed attempts. Try again in ${minutesLeft} minutes.`;
-      document.getElementById('rate-limit-warning').style.display = 'block';
-      return;
-    }
+    var email = document.getElementById('admin-email').value.trim();
+    var pass  = document.getElementById('admin-pass').value;
+    var errEl = document.getElementById('login-error');
 
-    const email = document.getElementById('admin-email').value.trim();
-    const pass = document.getElementById('admin-pass').value;
-    const errEl = document.getElementById('login-error');
-    const rateWarning = document.getElementById('rate-limit-warning');
-
-    rateWarning.style.display = 'none';
     errEl.style.display = 'none';
 
     if (!email || !pass) {
-      errEl.textContent = 'Please enter your email and password.';
-      errEl.style.display = 'block';
+      errEl.textContent    = 'Please enter your email and password.';
+      errEl.style.display  = 'block';
       return;
     }
 
     // Show spinner
-    document.getElementById('btn-login').disabled = true;
+    document.getElementById('btn-login').disabled          = true;
     document.getElementById('login-spinner').style.display = 'inline-block';
-    document.getElementById('login-label').textContent = 'Verifying…';
+    document.getElementById('login-label').textContent     = 'Verifying…';
 
-    // Attempt login
-    const result = await supabase.auth.signInWithPassword({ 
-      email: email, 
-      password: pass 
-    });
+    var result = await supabase.auth.signInWithPassword({ email: email, password: pass });
 
     // Hide spinner
-    document.getElementById('btn-login').disabled = false;
+    document.getElementById('btn-login').disabled          = false;
     document.getElementById('login-spinner').style.display = 'none';
-    document.getElementById('login-label').textContent = '🔐 Secure Login';
+    document.getElementById('login-label').textContent     = '🔐 Login';
 
     if (result.error) {
-      // Failed attempt - increment counter
-      loginAttempts++;
-      
-      // Check if should lock out
-      if (loginAttempts >= MAX_ATTEMPTS) {
-        lockedUntil = now + LOCKOUT_TIME;
-        rateWarning.textContent = `Too many failed attempts. Try again in 15 minutes.`;
-        rateWarning.style.display = 'block';
-        loginAttempts = 0;
-      }
-      
-      errEl.textContent = '❌ Invalid credentials';
+      errEl.textContent   = '❌ ' + result.error.message;
       errEl.style.display = 'block';
       document.getElementById('admin-pass').value = '';
-      
-      // Log failed attempt
-      fetch(`${SUPABASE_URL}/rest/v1/rpc/log_failed_login`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email: email })
-      }).catch(() => {});
-      
       return;
     }
-
-    // Success - reset counters
-    loginAttempts = 0;
-    lockedUntil = 0;
-    
-    // Log successful login
-    fetch(`${SUPABASE_URL}/rest/v1/rpc/log_admin_access`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ 
-        email: email,
-        action: 'login_success'
-      })
-    }).catch(() => {});
 
     showAdmin(result.data.user.email);
   };
 
-  // =============================================
-  // SECURE LOGOUT
-  // =============================================
+  // ── Logout ────────────────────────────────────────────────
   window.doLogout = async function() {
-    const email = document.getElementById('admin-email-display').textContent;
-    
-    // Log logout
-    fetch(`${SUPABASE_URL}/rest/v1/rpc/log_admin_access`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ 
-        email: email,
-        action: 'logout'
-      })
-    }).catch(() => {});
-
     await supabase.auth.signOut();
-    
     document.getElementById('admin-screen').style.display = 'none';
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('admin-email').value = '';
-    document.getElementById('admin-pass').value = '';
+    document.getElementById('admin-pass').value  = '';
   };
 
-  // =============================================
-  // SHOW ADMIN PANEL
-  // =============================================
+  // ── Show admin panel ──────────────────────────────────────
   function showAdmin(email) {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('admin-screen').style.display = 'block';
+    document.getElementById('login-screen').style.display    = 'none';
+    document.getElementById('admin-screen').style.display    = 'block';
     document.getElementById('admin-email-display').textContent = email || '';
     loadStats();
     loadOrders();
   }
 
-  // =============================================
-  // SECURE FETCH WITH AUTH
-  // =============================================
-  async function sbFetch(path, opts = {}) {
-    const sessionResult = await supabase.auth.getSession();
-    const token = sessionResult.data?.session?.access_token;
+  // ── Authenticated Supabase fetch ──────────────────────────
+  async function sbFetch(path, opts) {
+    var sessionResult = await supabase.auth.getSession();
+    var token = sessionResult.data &&
+                sessionResult.data.session &&
+                sessionResult.data.session.access_token;
 
-    const headers = {
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + (token || SUPABASE_KEY),
-      'Content-Type': 'application/json'
+    var defaults = {
+      headers: {
+        'apikey':        SUPABASE_KEY,
+        'Authorization': 'Bearer ' + (token || SUPABASE_KEY),
+        'Content-Type':  'application/json'
+      }
     };
-
-    return fetch(SUPABASE_URL + path, {
-      ...opts,
-      headers: { ...headers, ...(opts.headers || {}) }
-    });
+    return fetch(SUPABASE_URL + path, Object.assign({}, defaults, opts, {
+      headers: Object.assign({}, defaults.headers, (opts && opts.headers) || {})
+    }));
   }
 
-  // =============================================
-  // GENERATE SECURE TOKEN
-  // =============================================
   function generateToken() {
-    const arr = new Uint8Array(32);
+    var arr = new Uint8Array(32);
     crypto.getRandomValues(arr);
-    return 'admin_' + Array.from(arr, b => b.toString(16).padStart(2,'0')).join('');
+    return Array.from(arr, function(b) { return b.toString(16).padStart(2,'0'); }).join('');
   }
 
-  // =============================================
-  // LOAD STATS (VIA VIEW)
-  // =============================================
+  // ── Stats ─────────────────────────────────────────────────
   window.loadStats = function() {
-    sbFetch('/rest/v1/admin_stats')
-    .then(r => r.json())
-    .then(stats => {
-      if (!stats || stats.length === 0) return;
-      const s = stats[0];
-      document.getElementById('stat-total').textContent = s.total_payments || '0';
-      document.getElementById('stat-unused').textContent = s.pending_payments || '0';
-      document.getElementById('stat-printed').textContent = s.completed_payments || '0';
-      document.getElementById('stat-today').textContent = s.last_24h || '0';
+    sbFetch('/rest/v1/dac_payments?select=id,used,created_at')
+    .then(function(r) { return r.json(); })
+    .then(function(rows) {
+      if (!Array.isArray(rows)) return;
+      var today = new Date().toISOString().slice(0,10);
+      document.getElementById('stat-total').textContent   = rows.length;
+      document.getElementById('stat-unused').textContent  = rows.filter(function(r){ return !r.used; }).length;
+      document.getElementById('stat-printed').textContent = rows.filter(function(r){ return r.used; }).length;
+      document.getElementById('stat-today').textContent   = rows.filter(function(r){ return r.created_at && r.created_at.slice(0,10) === today; }).length;
     })
-    .catch(e => console.error('Stats error:', e));
+    .catch(function(e) { console.error(e); });
   };
 
-  // =============================================
-  // LOAD ORDERS (VIA VIEW)
-  // =============================================
+  // ── Orders ────────────────────────────────────────────────
   window.loadOrders = function() {
-    const tbody = document.getElementById('orders-body');
+    var tbody = document.getElementById('orders-body');
     tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Loading…</td></tr>';
-    
-    sbFetch('/rest/v1/admin_payments?order=created_at.desc&limit=100')
-    .then(r => r.json())
-    .then(rows => {
+    sbFetch('/rest/v1/dac_payments?select=*&order=created_at.desc&limit=100')
+    .then(function(r) { return r.json(); })
+    .then(function(rows) {
       if (!Array.isArray(rows) || rows.length === 0) {
         tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No records yet.</td></tr>';
         return;
       }
-      
-      tbody.innerHTML = rows.map(row => {
-        const statusBadge = row.used
+      tbody.innerHTML = rows.map(function(row) {
+        var isAdmin  = row.token && row.token.startsWith('admin_');
+        var statusBadge = row.used
           ? '<span class="badge badge-used">Used</span>'
           : '<span class="badge badge-unused">Ready</span>';
-        
+        if (isAdmin) statusBadge += ' <span class="badge badge-admin">Admin</span>';
+        var created  = row.created_at ? new Date(row.created_at).toLocaleString() : '—';
+        var usedAt   = row.used_at    ? new Date(row.used_at).toLocaleString()    : '—';
+        var shortTok = row.token ? row.token.slice(0,12) + '…' : '—';
         return '<tr>' +
           '<td style="color:var(--saffron);font-weight:600;">' + (row.dac_code || '—') + '</td>' +
-          '<td><span class="badge badge-sticker">' + (row.product_type || 'sticker') + '</span></td>' +
-          '<td style="color:var(--dim);">••••••••</td>' +  // Hide full tokens
+          '<td><span class="badge badge-sticker">' + (row.product || 'sticker') + '</span></td>' +
+          '<td style="color:var(--dim);">' + shortTok + '</td>' +
           '<td>' + statusBadge + '</td>' +
-          '<td style="color:var(--dim);">' + (row.created_at ? new Date(row.created_at).toLocaleString() : '—') + '</td>' +
-          '<td style="color:var(--dim);">' + (row.used_at ? new Date(row.used_at).toLocaleString() : '—') + '</td>' +
+          '<td style="color:var(--dim);">' + created + '</td>' +
+          '<td style="color:var(--dim);">' + usedAt + '</td>' +
           '</tr>';
       }).join('');
-      
       loadStats();
     })
-    .catch(e => {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="6" style="color:var(--coral);">Error loading records</td></tr>';
+    .catch(function(e) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="6" style="color:var(--coral);">Error loading records: ' + e.message + '</td></tr>';
     });
   };
 
-  // =============================================
-  // ADMIN UNLOCK (AUDIT LOGGED)
-  // =============================================
+  // ── Admin Free Unlock ─────────────────────────────────────
   window.adminUnlock = function() {
-    const codeInput = document.getElementById('unlock-code');
-    const product = document.getElementById('unlock-product').value;
-    const code = codeInput.value.trim().toUpperCase();
-    const msgEl = document.getElementById('unlock-msg');
+    var codeInput = document.getElementById('unlock-code');
+    var product   = document.getElementById('unlock-product').value;
+    var code      = codeInput.value.trim().toUpperCase();
+    var msgEl     = document.getElementById('unlock-msg');
 
     if (!code || code.length < 6) {
-      msgEl.className = 'unlock-msg error';
+      msgEl.className   = 'unlock-msg error';
       msgEl.textContent = '⚠ Please enter a valid DAC code.';
       return;
     }
 
-    msgEl.className = 'unlock-msg';
+    msgEl.className   = 'unlock-msg';
     msgEl.textContent = '⏳ Generating admin token…';
 
-    const token = generateToken();
+    var token = 'admin_' + generateToken();
 
-    // Call edge function instead of direct insert
-    fetch(`${SUPABASE_URL}/functions/v1/admin-create-token`, {
+    sbFetch('/rest/v1/dac_payments', {
       method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Prefer': 'return=minimal' },
       body: JSON.stringify({
-        dac_code: code,
-        token: token,
-        product: product
+        dac_code:   code,
+        token:      token,
+        product:    product,
+        used:       false,
+        created_at: new Date().toISOString()
       })
     })
-    .then(r => r.json())
-    .then(data => {
-      if (data.success) {
+    .then(function(r) {
+      if (r.ok || r.status === 201) {
         msgEl.className = 'unlock-msg success';
-        const targetPage = product === 'sticker' ? 'sticker.html' : 'layout.html';
-        const printUrl = targetPage + '?token=' + encodeURIComponent(token);
+        var targetPage  = product === 'sticker' ? 'sticker.html' : 'layout.html';
+        var printUrl    = targetPage + '?token=' + encodeURIComponent(token);
         msgEl.innerHTML = '✅ Token created! <a href="' + printUrl + '" target="_blank" style="color:var(--saffron);text-decoration:underline;">Click here to print →</a>';
         codeInput.value = '';
         loadOrders();
       } else {
-        msgEl.className = 'unlock-msg error';
-        msgEl.textContent = '⚠ ' + (data.error || 'Failed to create token');
+        msgEl.className   = 'unlock-msg error';
+        msgEl.textContent = '⚠ Failed to create token. Try again.';
       }
     })
-    .catch(e => {
-      msgEl.className = 'unlock-msg error';
+    .catch(function(e) {
+      msgEl.className   = 'unlock-msg error';
       msgEl.textContent = '⚠ Error: ' + e.message;
     });
   };
-
-  // =============================================
-  // TAMPER PROTECTION
-  // =============================================
-  setInterval(function() {
-    if (!document.body.hasAttribute('data-timestamp')) {
-      location.reload();
-    }
-  }, 5000);
 
 })();
 </script>
