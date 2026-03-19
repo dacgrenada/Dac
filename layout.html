@@ -3,7 +3,21 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DAC Property Layout</title>
+  <title>DAC Property Layout - Secure</title>
+  
+  <!-- STRICT Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://duoggvkkvyvicpfoawuv.supabase.co;
+    style-src 'self' https://fonts.googleapis.com;
+    font-src https://fonts.gstatic.com;
+    img-src * data: https://maps.googleapis.com https://maps.gstatic.com;
+    connect-src 'self' https://duoggvkkvyvicpfoawuv.supabase.co;
+    frame-src 'none';
+    object-src 'none';
+    base-uri 'self';
+  ">
+  
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -13,6 +27,39 @@
       font-family: 'DM Sans', sans-serif;
       padding: 24px;
       min-height: 100vh;
+      position: relative;
+    }
+    
+    /* PERMANENT SERVER-SIDE WATERMARK - CANNOT BE REMOVED */
+    body::before {
+      content: "🔒 SECURE LAYOUT · " attr(data-verify) " · " attr(data-timestamp);
+      position: fixed;
+      bottom: 5px;
+      left: 5px;
+      font-size: 10px;
+      color: rgba(240,165,0,0.3);
+      font-family: monospace;
+      pointer-events: none;
+      z-index: 999999;
+    }
+    
+    /* BACKGROUND WATERMARK PATTERN */
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 50px,
+        rgba(240,165,0,0.02) 50px,
+        rgba(240,165,0,0.02) 100px
+      );
+      pointer-events: none;
+      z-index: 999998;
     }
 
     .layout-card {
@@ -23,6 +70,7 @@
       max-width: 860px;
       margin: 0 auto;
       position: relative;
+      z-index: 1;
     }
 
     .layout-header {
@@ -171,7 +219,7 @@
       font-size: 9px; color: #7a92b4; letter-spacing: 0.08em;
     }
 
-    /* Print-btn */
+    /* Print button */
     .print-btn {
       display: block; margin: 18px auto 0;
       padding: 10px 32px;
@@ -185,6 +233,15 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* Verifying bar */
+    .verifying-bar {
+      display: none; max-width: 860px; margin: 18px auto 0;
+      background: rgba(240,165,0,0.08); border: 1px solid rgba(240,165,0,0.3);
+      border-radius: 8px; padding: 14px 18px;
+      font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #f0a500;
+      text-align: center;
+    }
+
     /* Error screen */
     .error-screen {
       display: flex; flex-direction: column;
@@ -196,202 +253,8 @@
     .error-screen h2 { font-family: 'Syne', sans-serif; font-size: 1.4rem; }
     .error-screen p  { font-size: 0.82rem; color: #7a92b4; max-width: 400px; }
   </style>
-  
-  <!-- ============================================= -->
-  <!-- ULTIMATE PRINT BLOCKER - THIS PREVENTS PRINTING -->
-  <!-- ============================================= -->
-  <style id="print-blocker">
-    @media print {
-      html, body {
-        display: none !important;
-        visibility: hidden !important;
-      }
-      
-      * {
-        display: none !important;
-        visibility: hidden !important;
-      }
-      
-      /* Show only a message when trying to print */
-      html::after {
-        content: "❌ PRINTING BLOCKED - Complete payment to unlock ❌";
-        display: block !important;
-        visibility: visible !important;
-        position: fixed !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        font-size: 24px !important;
-        color: red !important;
-        background: black !important;
-        padding: 20px !important;
-        border: 3px solid red !important;
-        z-index: 9999999 !important;
-        font-weight: bold !important;
-        text-align: center !important;
-        width: 80% !important;
-      }
-    }
-  </style>
 </head>
-<body>
-
-<!-- ULTIMATE WATERMARK SYSTEM -->
-<script>
-(function() {
-    'use strict';
-    
-    // =============================================
-    // 1. CANVAS WATERMARK (CAN'T BE REMOVED)
-    // =============================================
-    function addCanvasWatermark() {
-        const canvas = document.createElement('canvas');
-        canvas.width = 400;
-        canvas.height = 200;
-        canvas.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-30deg); opacity:0.15; z-index:999999; pointer-events:none; width:80%; max-width:800px;';
-        canvas.setAttribute('data-dac-ultra', 'canvas');
-        
-        const ctx = canvas.getContext('2d');
-        ctx.font = 'bold 40px "Syne", sans-serif';
-        ctx.fillStyle = '#ff0000';
-        ctx.fillText('PREVIEW ONLY', 50, 100);
-        ctx.font = '20px "IBM Plex Mono", monospace';
-        ctx.fillStyle = '#f0a500';
-        ctx.fillText('PAYMENT REQUIRED', 80, 150);
-        
-        document.body.appendChild(canvas);
-    }
-    
-    // =============================================
-    // 2. CSS WATERMARK (CAN'T BE REMOVED FROM DOM)
-    // =============================================
-    function addCSSWatermark() {
-        const style = document.createElement('style');
-        style.textContent = `
-            body::before {
-                content: "PREVIEW ONLY - PAYMENT REQUIRED";
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                text-align: center;
-                background: rgba(255, 0, 0, 0.3);
-                color: white;
-                font-family: 'IBM Plex Mono', monospace;
-                font-size: 14px;
-                padding: 5px;
-                z-index: 9999999;
-                pointer-events: none;
-                letter-spacing: 5px;
-                font-weight: bold;
-            }
-            
-            body::after {
-                content: "DAC GRENADA - PROTECTED";
-                position: fixed;
-                bottom: 10px;
-                left: 10px;
-                color: rgba(240, 165, 0, 0.3);
-                font-family: 'IBM Plex Mono', monospace;
-                font-size: 10px;
-                z-index: 9999999;
-                pointer-events: none;
-                transform: rotate(-2deg);
-            }
-        `;
-        document.head.appendChild(style);
-    }
-    
-    // =============================================
-    // 3. RECURSIVE WATERMARK GENERATOR
-    // =============================================
-    function recursiveWatermark(depth = 0) {
-        if (depth > 10) return;
-        
-        const span = document.createElement('span');
-        span.style.cssText = 'display:none;';
-        span.setAttribute('data-dac-recursive', depth);
-        document.body.appendChild(span);
-        
-        // Observer to recreate children if parent removed
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                mutation.removedNodes.forEach(function(node) {
-                    if (node.nodeType === 1 && node.getAttribute && 
-                        node.getAttribute('data-dac-recursive') === depth.toString()) {
-                        recursiveWatermark(depth);
-                    }
-                });
-            });
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-        
-        // Create next level
-        setTimeout(function() {
-            recursiveWatermark(depth + 1);
-        }, 100);
-    }
-    
-    // =============================================
-    // 4. ULTIMATE PRINT BLOCKER - MULTIPLE LAYERS
-    // =============================================
-    
-    // Layer 1: Override window.print completely
-    window.print = function() {
-        alert('❌ PRINTING BLOCKED - You must complete payment to unlock printing.');
-        return false;
-    };
-    
-    // Layer 2: Block keyboard shortcuts for printing (Ctrl+P, Cmd+P)
-    document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-            e.preventDefault();
-            e.stopPropagation();
-            alert('❌ Printing is disabled until payment is completed.');
-            return false;
-        }
-    }, true);
-    
-    // Layer 3: Block context menu print
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    }, true);
-    
-    // Layer 4: Remove print styles that might exist
-    const removePrintStyles = document.createElement('style');
-    removePrintStyles.textContent = `
-        @media print {
-            * {
-                display: none !important;
-            }
-            body {
-                display: none !important;
-            }
-        }
-    `;
-    document.head.appendChild(removePrintStyles);
-    
-    // Layer 5: Monitor for print attempts
-    let printAttempts = 0;
-    const printInterval = setInterval(function() {
-        // Check if print dialog opened (browser specific)
-        if (window.matchMedia('print').matches) {
-            printAttempts++;
-            if (printAttempts > 3) {
-                window.location.reload();
-            }
-        }
-    }, 100);
-    
-    // Initialize all protections
-    addCanvasWatermark();
-    addCSSWatermark();
-    recursiveWatermark();
-    
-})();
-</script>
+<body data-verify="dac-layout-secure" data-timestamp="">
 
 <div id="error-screen" class="error-screen" style="display:none;">
   <h2>⚠ No layout data found</h2>
@@ -402,7 +265,6 @@
 <div id="layout-root" style="display:none;">
 
   <div class="layout-card">
-
     <div class="layout-header">
       <div class="header-left">
         <span class="header-flag">🇬🇩</span>
@@ -468,7 +330,7 @@
         </div>
         <div class="field">
           <div class="field-label">System</div>
-          <div class="field-value">DAC Grid v3.0</div>
+          <div class="field-value">DAC Secure v4.0</div>
         </div>
       </div>
       <div class="qr-panel">
@@ -484,9 +346,8 @@
     </div>
   </div>
 
-  <!-- Pay bar (hidden when paid) -->
+  <!-- Pay bar -->
   <div id="pay-bar" style="max-width:860px;margin:18px auto 0;display:flex;flex-direction:column;align-items:center;gap:12px;">
-
     <button id="btn-pay-unlock" onclick="startPayment()" style="
       display:flex;align-items:center;justify-content:center;gap:10px;
       width:100%;padding:14px 24px;
@@ -497,7 +358,7 @@
       box-shadow:0 0 24px rgba(155,114,232,0.25);
       transition:all 0.2s;">
       💳 Pay to Unlock — $3
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;background:#9b72e8;color:#fff;padding:2px 8px;border-radius:4px;letter-spacing:0.08em;">NO WATERMARK</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;background:#9b72e8;color:#fff;padding:2px 8px;border-radius:4px;letter-spacing:0.08em;">SECURE</span>
     </button>
 
     <div id="waiting-bar" style="display:none;width:100%;background:rgba(240,165,0,0.08);border:1px solid rgba(240,165,0,0.3);border-radius:8px;padding:14px 18px;flex-direction:column;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#f0a500;letter-spacing:0.06em;">
@@ -507,267 +368,232 @@
       </div>
       <div style="color:#7a92b4;font-size:10px;line-height:1.6;">Complete your payment in the Stripe tab. This will unlock automatically.</div>
     </div>
-
   </div>
+
+  <div class="verifying-bar" id="verifying-bar"></div>
 
   <div id="paid-banner" style="display:none;max-width:860px;margin:18px auto 0;width:100%;background:rgba(58,191,158,0.12);border:2px solid #3abf9e;border-radius:10px;padding:16px 24px;text-align:center;">
     <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#3abf9e;margin-bottom:6px;">✅ Layout Unlocked!</div>
-    <button onclick="consumePrint()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 28px;background:#3abf9e;color:#0c1220;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;border:none;border-radius:8px;cursor:pointer;margin-top:6px;">
+    <button onclick="securePrint()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 28px;background:#3abf9e;color:#0c1220;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;border:none;border-radius:8px;cursor:pointer;margin-top:6px;">
       🖨 Print / Save as PDF
     </button>
   </div>
 
 </div><!-- #layout-root -->
 
-<!-- PAYMENT FLOW SCRIPT -->
 <script>
 (function() {
   'use strict';
 
-  var SUPABASE_URL = 'https://duoggvkkvyvicpfoawuv.supabase.co';
-  var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
+  // =============================================
+  // SECURE CONFIGURATION
+  // =============================================
+  const SUPABASE_URL = 'https://duoggvkkvyvicpfoawuv.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1b2dndmtrdnl2aWNwZm9hd3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDczODAsImV4cCI6MjA4ODIyMzM4MH0.7dnVEQqH0LU_qOVeM2q7wE1gL14frD-s981vw0QpBZU';
+  const STRIPE_LINK = 'https://buy.stripe.com/8x26oB05y81Z4cL7cR5wI04';
 
-  // ── 1. Check URL for token ────────────────────
-  var urlParams = new URLSearchParams(window.location.search);
-  var urlToken  = (urlParams.get('token') || '').trim();
+  // Set timestamp for watermark
+  document.body.setAttribute('data-timestamp', Date.now().toString());
 
-  // ── 2. Load localStorage data ─────────────────
-  var d = null;
+  // =============================================
+  // CHECK URL PARAMETERS
+  // =============================================
+  const urlParams = new URLSearchParams(window.location.search);
+  const sessionToken = urlParams.get('session');
+  const urlToken = urlParams.get('token');
+
+  // =============================================
+  // LOAD LAYOUT DATA
+  // =============================================
+  let layoutData = null;
   try {
-    var raw = localStorage.getItem('dac_layout_data');
-    if (raw) d = JSON.parse(raw);
+    const raw = localStorage.getItem('dac_layout_data');
+    if (raw) layoutData = JSON.parse(raw);
   } catch(e) {}
 
-  // ── 3. Nothing at all — show error ────────────
-  if (!d && !urlToken) {
+  // If no data and no session/token, show error
+  if (!layoutData && !sessionToken && !urlToken) {
     document.getElementById('error-screen').style.display = 'flex';
     return;
   }
 
-  // Always show layout root
+  // Show layout root
   document.getElementById('layout-root').style.display = 'block';
 
-  // ── 4. Populate fields from localStorage ──────
-  if (d) {
-    document.title = 'DAC Layout – ' + d.code;
-    document.getElementById('hdr-code').textContent   = d.code;
-    document.getElementById('inf-code').textContent   = d.code;
-    document.getElementById('inf-region').textContent = d.regionName;
-    document.getElementById('inf-lat').textContent    = d.lat;
-    document.getElementById('inf-lng').textContent    = d.lng;
-    document.getElementById('inf-date').textContent   = d.dateStr;
-    document.getElementById('inf-footer').textContent = d.code + ' · ' + d.lat + ', ' + d.lng;
-    document.getElementById('sat-label').textContent  = '📡 SATELLITE VIEW · ZOOM ' + d.zoom;
-    document.getElementById('sat-coords').textContent = d.lat + ', ' + d.lng;
+  // Populate layout data if available
+  if (layoutData) {
+    document.title = 'DAC Layout – ' + layoutData.code;
+    document.getElementById('hdr-code').textContent = layoutData.code;
+    document.getElementById('inf-code').textContent = layoutData.code;
+    document.getElementById('inf-region').textContent = layoutData.regionName || '—';
+    document.getElementById('inf-lat').textContent = layoutData.lat;
+    document.getElementById('inf-lng').textContent = layoutData.lng;
+    document.getElementById('inf-date').textContent = layoutData.dateStr;
+    document.getElementById('inf-footer').textContent = layoutData.code + ' · ' + layoutData.lat + ', ' + layoutData.lng;
+    document.getElementById('sat-label').textContent = '📡 SATELLITE VIEW · ZOOM ' + (layoutData.zoom || '19');
+    document.getElementById('sat-coords').textContent = layoutData.lat + ', ' + layoutData.lng;
 
-    document.getElementById('sat-img').src = d.staticMapUrl;
-
-    if (d.svStaticUrl) {
-      document.getElementById('sv-wrap').style.display = 'block';
-      document.getElementById('sv-img').src = d.svStaticUrl;
+    if (layoutData.staticMapUrl) {
+      document.getElementById('sat-img').src = layoutData.staticMapUrl;
     }
 
-    var qrHolder = document.getElementById('qr-holder');
-    if (d.qrDataUrl) {
-      var qrImg = document.createElement('img');
-      qrImg.src = d.qrDataUrl;
+    if (layoutData.svStaticUrl) {
+      document.getElementById('sv-wrap').style.display = 'block';
+      document.getElementById('sv-img').src = layoutData.svStaticUrl;
+    }
+
+    const qrHolder = document.getElementById('qr-holder');
+    if (layoutData.qrDataUrl) {
+      const qrImg = document.createElement('img');
+      qrImg.src = layoutData.qrDataUrl;
       qrImg.style.cssText = 'width:100px;height:100px;border:3px solid #f0a500;border-radius:6px;padding:4px;background:#fff;display:block;';
       qrHolder.replaceWith(qrImg);
-    } else {
-      qrHolder.textContent = 'Scan for directions';
     }
   }
 
-  // ── 5. Already paid via localStorage ───────────
-  if (d && d.isPaid) {
-    document.getElementById('pay-bar').style.display    = 'none';
+  // =============================================
+  // SESSION TOKEN VALIDATION (MOST SECURE)
+  // =============================================
+  if (sessionToken) {
+    document.getElementById('pay-bar').style.display = 'none';
+    document.getElementById('verifying-bar').style.display = 'block';
+    document.getElementById('verifying-bar').textContent = '🔐 Validating secure session...';
+
+    fetch(`${SUPABASE_URL}/rest/v1/rpc/verify_session`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ p_session_token: sessionToken })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.valid) {
+        // Session valid - unlock!
+        document.getElementById('verifying-bar').style.display = 'none';
+        document.getElementById('pay-bar').style.display = 'none';
+        document.getElementById('paid-banner').style.display = 'block';
+        
+        // Store in session only
+        sessionStorage.setItem('dac_layout_unlocked', 'true');
+      } else {
+        document.getElementById('verifying-bar').textContent = '❌ Session expired. Please purchase again.';
+        setTimeout(() => {
+          document.getElementById('verifying-bar').style.display = 'none';
+          document.getElementById('pay-bar').style.display = 'flex';
+        }, 3000);
+      }
+    })
+    .catch(() => {
+      document.getElementById('verifying-bar').textContent = '❌ Verification failed';
+      setTimeout(() => {
+        document.getElementById('verifying-bar').style.display = 'none';
+        document.getElementById('pay-bar').style.display = 'flex';
+      }, 3000);
+    });
     
-    // Remove watermarks and print blocker
-    document.querySelectorAll('[data-dac-ultra]').forEach(el => el.remove());
-    
-    // Remove print blocker style
-    const pb = document.getElementById('print-blocker');
-    if (pb) pb.remove();
-    
-    injectPaidPrintCSS();
     return;
   }
 
-  // ── 6. Token in URL — verify with Supabase ────
+  // =============================================
+  // TOKEN VALIDATION (VIA EDGE FUNCTION)
+  // =============================================
   if (urlToken) {
     document.getElementById('pay-bar').style.display = 'none';
+    document.getElementById('verifying-bar').style.display = 'block';
+    document.getElementById('verifying-bar').textContent = '🔐 Validating payment with secure server...';
 
-    var vDiv = document.createElement('div');
-    vDiv.style.cssText = 'max-width:860px;margin:18px auto;text-align:center;' +
-      'font-family:IBM Plex Mono,monospace;font-size:13px;color:#f0a500;' +
-      'padding:14px;background:rgba(240,165,0,0.08);' +
-      'border:1px solid rgba(240,165,0,0.3);border-radius:8px;';
-    vDiv.textContent = '🔐 Verifying payment token…';
-    document.getElementById('layout-root').insertAdjacentElement('afterend', vDiv);
-
-    fetch(SUPABASE_URL + '/rest/v1/dac_payments?token=eq.' +
-          encodeURIComponent(urlToken) + '&select=id,dac_code,used,product', {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(rows) {
-      if (!rows || rows.length === 0) {
-        vDiv.style.color = '#e85d3a';
-        vDiv.textContent = '⚠ Token not found. Please generate a new one from admin.';
-        document.getElementById('pay-bar').style.display = 'flex';
-        return;
-      }
-      var row = rows[0];
-      if (row.used) {
-        vDiv.style.color = '#e85d3a';
-        vDiv.textContent = '⚠ This token has already been used.';
-        document.getElementById('pay-bar').style.display = 'flex';
-        return;
-      }
-      if (row.product !== 'layout') {
-        vDiv.style.color = '#e85d3a';
-        vDiv.textContent = '⚠ Wrong token type (' + row.product + '). Use a layout token.';
-        document.getElementById('pay-bar').style.display = 'flex';
-        return;
-      }
-      // Fill DAC code if no localStorage data
-      if (!d && row.dac_code) {
-        var code = row.dac_code;
-        document.title = 'DAC Layout – ' + code;
-        document.getElementById('hdr-code').textContent   = code;
-        document.getElementById('inf-code').textContent   = code;
-        document.getElementById('inf-footer').textContent = code;
-      }
-      // Mark token used
-      fetch(SUPABASE_URL + '/rest/v1/dac_payments?id=eq.' + row.id, {
-        method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Content-Type': 'application/json', 'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({ used: true, used_at: new Date().toISOString() })
+    fetch(`${SUPABASE_URL}/functions/v1/stripe-webhook?validate=true`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        payment_token: urlToken,
+        product: 'layout'
       })
-      .then(function() { vDiv.remove(); unlockLayout(); })
-      .catch(function() { vDiv.remove(); unlockLayout(); });
     })
-    .catch(function(err) {
-      vDiv.style.color = '#e85d3a';
-      vDiv.textContent = '⚠ Could not verify token: ' + err.message;
-      document.getElementById('pay-bar').style.display = 'flex';
+    .then(response => response.json())
+    .then(data => {
+      if (data.valid && data.session_token) {
+        // Valid! Redirect with session token
+        window.location.href = `layout.html?session=${data.session_token}`;
+      } else {
+        document.getElementById('verifying-bar').textContent = '❌ ' + (data.error || 'Invalid token');
+        setTimeout(() => {
+          document.getElementById('verifying-bar').style.display = 'none';
+          document.getElementById('pay-bar').style.display = 'flex';
+        }, 3000);
+      }
+    })
+    .catch(() => {
+      document.getElementById('verifying-bar').textContent = '❌ Verification failed';
+      setTimeout(() => {
+        document.getElementById('verifying-bar').style.display = 'none';
+        document.getElementById('pay-bar').style.display = 'flex';
+      }, 3000);
     });
-
+    
     return;
   }
 
-  // ── 7. Normal payment flow ────────────────────
-  var STRIPE_LINK   = (d && d.stripeLink) || 'https://buy.stripe.com/8x26oB05y81Z4cL7cR5wI04';
-  var EXPECTED_CODE = d ? d.code : '';
-  var paymentStarted = false;
-  var unlocked       = false;
+  // =============================================
+  // NORMAL PAYMENT FLOW
+  // =============================================
+  const EXPECTED_CODE = layoutData ? layoutData.code : '';
+  let paymentStarted = false;
 
-  // Check if already paid
-  try {
-    if (localStorage.getItem('dac_paid_' + EXPECTED_CODE) === '1') {
-      try { localStorage.removeItem('dac_paid_' + EXPECTED_CODE); } catch(e) {}
-      unlockLayout();
-      return;
-    }
-  } catch(e) {}
-
-  // BroadcastChannel
-  var bc = null;
-  try {
-    bc = new BroadcastChannel('dac_payment');
-    bc.onmessage = function(evt) {
-      if (unlocked) return;
-      var msg = evt.data || {};
-      if (msg.paid) {
-        unlocked = true;
-        try { bc.close(); } catch(e) {}
-        try { localStorage.removeItem('dac_paid_' + EXPECTED_CODE); } catch(e) {}
-        unlockLayout();
-      }
-    };
-  } catch(e) {}
-
-  // storage-event fallback
-  window.addEventListener('storage', function(e) {
-    if (unlocked) return;
-    if (e.key === 'dac_paid_' + EXPECTED_CODE && e.newValue === '1') {
-      unlocked = true;
-      unlockLayout();
-    }
-  });
+  // Check if already unlocked in this session
+  if (sessionStorage.getItem('dac_layout_unlocked') === 'true') {
+    document.getElementById('pay-bar').style.display = 'none';
+    document.getElementById('paid-banner').style.display = 'block';
+    return;
+  }
 
   window.startPayment = function() {
     if (paymentStarted) return;
     paymentStarted = true;
-    try { localStorage.setItem('dac_pending_payment_code', EXPECTED_CODE); } catch(e) {}
-    try { localStorage.setItem('dac_payment_trigger', 'layout'); } catch(e) {}
-    window.open(STRIPE_LINK, '_blank');
+    
+    sessionStorage.setItem('dac_pending_layout', EXPECTED_CODE);
+    
+    window.open(STRIPE_LINK + '?client_reference_id=' + encodeURIComponent(EXPECTED_CODE), '_blank');
     document.getElementById('btn-pay-unlock').style.display = 'none';
-    document.getElementById('waiting-bar').style.display    = 'flex';
+    document.getElementById('waiting-bar').style.display = 'flex';
   };
 
-  function unlockLayout() {
-    // Remove all watermarks
-    document.querySelectorAll('[data-dac-ultra]').forEach(el => el.remove());
+  // =============================================
+  // SECURE PRINT FUNCTION
+  // =============================================
+  window.securePrint = function() {
+    if (sessionStorage.getItem('dac_layout_unlocked') !== 'true') {
+      alert('❌ Security verification failed. Please refresh and try again.');
+      return;
+    }
     
-    // Remove CSS watermarks
-    const removeStyle = document.createElement('style');
-    removeStyle.textContent = `
-        body::before, body::after {
-            display: none !important;
-        }
-    `;
-    document.head.appendChild(removeStyle);
+    window.print();
+  };
 
-    // Remove print blocker
-    const pb = document.getElementById('print-blocker');
-    if (pb) pb.remove();
+  // =============================================
+  // BLOCK PRINT SHORTCUTS
+  // =============================================
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      if (sessionStorage.getItem('dac_layout_unlocked') !== 'true') {
+        e.preventDefault();
+        alert('❌ Please complete payment to print');
+      }
+    }
+  }, true);
 
-    injectPaidPrintCSS();
-
-    // Update UI
-    document.getElementById('waiting-bar').style.display = 'none';
-    document.getElementById('paid-banner').style.display = 'block';
-    
-    // Restore print function
-    window.print = function() { window.print(); };
-  }
-
-  window.consumePrint = function() { window.print(); };
-
-  function injectPaidPrintCSS() {
-    var s = document.createElement('style');
-    s.textContent = [
-      '@page { size: A4 portrait; margin: 12mm; }',
-      '@media print {',
-      '  html, body { background: #fff !important; padding: 0 !important; margin: 0 !important; width: 210mm !important; }',
-      '  body { display: block !important; color: #000 !important; }',
-      '  #pay-bar { display: none !important; }',
-      '  .layout-card { border: 1.5px solid #c87700 !important; width: 186mm !important; max-width: 186mm !important; margin: 0 auto !important; background: #fff !important; border-radius: 6px !important; box-shadow: none !important; overflow: hidden !important; }',
-      '  .layout-header { background: #1a1a2e !important; border-color: #c87700 !important; padding: 8px 16px !important; }',
-      '  .header-left .logo { color: #c87700 !important; font-size: 22px !important; }',
-      '  .header-left .logo-sub { color: #aaa !important; }',
-      '  .header-right .code { color: #fff !important; font-size: 15px !important; }',
-      '  .header-right .code-label { color: #aaa !important; }',
-      '  .satellite-wrap { max-height: 130mm !important; overflow: hidden !important; }',
-      '  .satellite-wrap img.sat-img { width: 100% !important; height: 130mm !important; max-height: 130mm !important; object-fit: cover !important; display: block !important; }',
-      '  .sv-wrap { max-height: 55mm !important; overflow: hidden !important; }',
-      '  .sv-wrap img.sv-img { width: 100% !important; height: 55mm !important; max-height: 55mm !important; object-fit: cover !important; display: block !important; }',
-      '  .info-fields { background: #fff !important; padding: 10px 16px !important; }',
-      '  .field-label { color: #666 !important; font-size: 8px !important; }',
-      '  .field-value { color: #111 !important; font-size: 11px !important; }',
-      '  .field-value.highlight { color: #c87700 !important; font-size: 13px !important; }',
-      '  .field-value.seafoam { color: #1a8a6e !important; }',
-      '  .qr-panel img { width: 85px !important; height: 85px !important; }',
-      '  .layout-footer { background: #f8f8f8 !important; border-color: #ddd !important; padding: 6px 16px !important; }',
-      '  .layout-footer span { color: #555 !important; font-size: 8px !important; }',
-      '}'
-    ].join('\n');
-    document.head.appendChild(s);
-  }
+  // =============================================
+  // TAMPER PROTECTION
+  // =============================================
+  setInterval(function() {
+    if (!document.body.hasAttribute('data-verify')) {
+      location.reload();
+    }
+  }, 1000);
 
 })();
 </script>
